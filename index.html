@@ -27,7 +27,7 @@
 </head>
 <body class="bg-dark text-white antialiased pb-28">
     <!-- Header -->
-    <header class="sticky top-0 z-40 bg-dark/95 backdrop-blur-md border-b border-white/10">
+    <header class="bg-dark border-b border-white/10">
         <div class="flex justify-between items-center px-4 py-3 relative">
             <!-- Top Left Logo -->
             <div class="relative z-10 flex items-center shrink-0">
@@ -252,5 +252,9 @@
             
         </div>
     </div>
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" onclick="scrollToTop()" class="fixed bottom-24 right-4 w-12 h-12 bg-brand/90 backdrop-blur-md text-white rounded-full shadow-2xl shadow-brand/20 flex items-center justify-center translate-y-24 opacity-0 transition-all duration-300 z-50 hover:bg-brand active:scale-90 border border-white/10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+    </button>
 </body>
 </html>

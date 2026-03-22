@@ -154,16 +154,22 @@ function renderNav() {
 
 function renderMenu() {
     const container = document.getElementById('menuContainer');
-    container.innerHTML = menuData.map((cat, index) => `
-        <section id="cat-${index}" class="scroll-mt-36 menu-section">
+    container.innerHTML = menuData.map((cat, index) => {
+        const isClassic = index === 0;
+        const cardBgColor = isClassic ? 'bg-[#12141a]' : 'bg-[#1c1814]';
+        const cardBorderColor = isClassic ? 'border-[#1e2330]' : 'border-[#2e2620]';
+
+        return `
+        <section id="cat-${index}" class="scroll-mt-6 menu-section">
             <h2 class="text-2xl font-bold mb-6 tracking-tight text-white/95 flex items-center justify-center gap-4 text-center uppercase text-[22px]">
                 <div class="h-px bg-white/10 flex-grow"></div>
                 ${currentLang === 'en' ? cat.categoryEn : cat.category}
                 <div class="h-px bg-white/10 flex-grow"></div>
             </h2>
+            
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 ${cat.items.map(item => `
-                    <div class="product-card flex flex-col justify-between bg-card p-4 rounded-2xl border border-white/5 shadow-lg shadow-black/20">
+                    <div class="product-card flex flex-col justify-between ${cardBgColor} p-4 rounded-2xl border ${cardBorderColor} shadow-lg shadow-black/30">
                         <div class="mb-3">
                             <h3 class="font-bold text-[17px] leading-snug mb-1.5 text-white/95">${currentLang === 'en' ? item.nameEn : item.name}</h3>
                             <p class="text-xs text-muted leading-relaxed line-clamp-3">${currentLang === 'en' ? item.ingredientsEn : item.ingredients}</p>
@@ -180,7 +186,8 @@ function renderMenu() {
                 `).join('')}
             </div>
         </section>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function observeCategories() {
@@ -200,7 +207,7 @@ function observeCategories() {
                 }
             }
         });
-    }, { rootMargin: '-20% 0px -70% 0px' });
+    }, { rootMargin: '-320px 0px -50% 0px' });
     
     document.querySelectorAll('.menu-section').forEach(sec => observer.observe(sec));
 }
@@ -651,3 +658,18 @@ function submitOrder() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTopBtn');
+    if (window.scrollY > 300) {
+        btn.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
+        btn.classList.add('opacity-100', 'translate-y-0');
+    } else {
+        btn.classList.remove('opacity-100', 'translate-y-0');
+        btn.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+    }
+});
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
