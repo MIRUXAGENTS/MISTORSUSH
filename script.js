@@ -163,8 +163,18 @@ function renderMenu() {
     if (!cat) return;
 
     const isClassic = currentCategoryView === 0;
-    const cardBgColor = isClassic ? 'bg-[#12141a]' : 'bg-[#1c1814]';
-    const cardBorderColor = isClassic ? 'border-[#1e2330]' : 'border-[#2e2620]';
+    const isDrinks = currentCategoryView === 2;
+    
+    let cardBgColor = 'bg-[#1c1814]';
+    let cardBorderColor = 'border-[#2e2620]';
+    
+    if (isClassic) {
+        cardBgColor = 'bg-[#12141a]';
+        cardBorderColor = 'border-[#1e2330]';
+    } else if (isDrinks) {
+        cardBgColor = 'bg-[#2a2d39]';
+        cardBorderColor = 'border-[#3a3e4c]';
+    }
 
     if (cat.items.length === 0) {
         container.innerHTML = `
@@ -195,6 +205,7 @@ function renderMenu() {
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             ${cat.items.map(item => `
                 <div class="product-card flex flex-col justify-between ${cardBgColor} p-4 rounded-2xl border ${cardBorderColor} shadow-lg shadow-black/30">
+                    ${item.image ? `<div class="w-full flex justify-center mb-3"><img src="${item.image}" alt="${item.name}" class="h-28 object-contain drop-shadow-md"></div>` : ''}
                     <div class="mb-3">
                         <h3 class="font-bold text-[17px] leading-snug mb-1.5 text-white/95">${currentLang === 'en' ? item.nameEn : item.name}</h3>
                         <p class="text-xs text-muted leading-relaxed line-clamp-3">${currentLang === 'en' ? item.ingredientsEn : item.ingredients}</p>
