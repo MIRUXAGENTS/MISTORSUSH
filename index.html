@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Суши Ашкелон | Mistorsush Доставка</title>
+    <meta name="description" content="Доставка роллов Ашкелон. Вкусные классические и запеченные суши. Заказывайте прямо сейчас!">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="data.js" defer></script>
+    <script src="script.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#E63946',
+                        dark: '#0f1115',
+                        card: '#1A1D24',
+                        muted: '#A8B2C1'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark text-white antialiased pb-28">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-dark/95 backdrop-blur-md border-b border-white/10">
+        <div class="flex justify-between items-center px-4 py-3 relative">
+            <!-- Top Left Logo -->
+            <div class="relative z-10 flex items-center">
+                <img src="img/mistorsush_logo.png" alt="Mistorsush Logo" class="w-20 h-20 object-cover rounded-full shadow-lg border border-white/20 bg-white/5">
+            </div>
+
+            <!-- Center Title -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-1">
+                <h1 class="text-[18px] font-bold tracking-[0.25em] text-white/95 uppercase drop-shadow-md ml-2">
+                    MISTOR<span class="text-brand font-black">SUSH</span>
+                </h1>
+                <div class="w-8 h-[3px] bg-brand mt-1.5 rounded-full shadow-[0_0_8px_rgba(230,57,70,0.6)]"></div>
+            </div>
+
+            <!-- Top Right Icons -->
+            <div class="flex items-center gap-2 relative z-10">
+                <!-- Instagram -->
+                <a href="https://instagram.com/mvladislavmistorsushi" target="_blank" class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-white active:scale-95 transition shadow-lg shadow-pink-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                </a>
+                <!-- WhatsApp -->
+                <a href="https://wa.me/972559284670" target="_blank" class="w-9 h-9 rounded-full bg-[#25D366] flex items-center justify-center text-white active:scale-95 transition shadow-lg shadow-[#25D366]/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </a>
+                <!-- Cart Button -->
+                <button onclick="openCartModal()" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20 active:scale-95 transition relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                    <div id="headerCartCount" class="absolute -top-1 -right-1 bg-brand text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden shadow-sm shadow-black/50">0</div>
+                </button>
+            </div>
+        </div>
+        
+        <div class="px-4 pb-3 flex flex-col items-center justify-center space-y-1 mt-4">
+            <p class="text-[11px] font-bold tracking-widest text-muted uppercase text-center">Суши в Ашкелоне</p>
+            <h2 class="text-xs font-semibold text-white/95 text-center uppercase tracking-wide">Работаем по предварительным заказам</h2>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-brand mt-1.5">
+                <span class="text-[10px] font-black tracking-widest uppercase">Open Everyday 12:00 - 00:00</span>
+            </div>
+        </div>
+
+        <!-- Friday Discount Banner (Full Width) -->
+        <div class="w-full bg-gradient-to-r from-[#171a21] via-card to-[#171a21] border-y border-white/5 py-3.5 px-6 relative overflow-hidden flex items-center justify-center sm:justify-start shadow-xl shadow-black/30 group mt-1">
+            <div class="absolute -left-5 -bottom-5 w-24 h-24 bg-brand/20 blur-[30px] rounded-full"></div>
+            <div class="absolute -right-5 -top-5 w-20 h-20 bg-white/10 blur-[25px] rounded-full"></div>
+            
+            <div class="relative z-10 flex items-center gap-4">
+                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-brand/10 border border-brand/30 text-brand shadow-[0_0_15px_rgba(230,57,70,0.2)] shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>
+                </div>
+                <div class="flex flex-col text-left justify-center">
+                    <span class="text-brand font-black text-sm uppercase tracking-wider">Акция Пятницы!</span>
+                    <span class="text-white/90 text-xs font-medium leading-snug mt-1">Все запеченные роллы <strong class="text-white bg-white/10 px-1.5 py-0.5 rounded leading-none shadow-sm ml-1">2+1</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Nav -->
+        <nav class="overflow-x-auto no-scrollbar flex gap-2 px-4 py-3 border-t border-white/5" id="categoryNav">
+            <!-- Populated via JS -->
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-6 space-y-10" id="menuContainer">
+        <!-- Rendered by JS -->
+    </main>
+
+    <!-- Fixed Cart Widget -->
+    <div id="cartWidget" class="fixed bottom-0 left-0 w-full p-4 transform translate-y-[150%] transition-transform duration-300 z-40">
+        <div class="glass-cart rounded-2xl flex justify-between items-center p-4 float-bottom-safe cursor-pointer active:scale-95 transition-transform" onclick="openCartModal()">
+            <div class="flex flex-col">
+                <span class="text-sm font-medium text-white/90">В корзине <span id="cartCount">0</span> шт</span>
+                <span class="text-xl font-bold" id="cartTotal">0₪</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white text-brand px-5 py-2.5 rounded-xl font-semibold shadow-lg">
+                Заказать 
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 z-50 flex justify-center items-end sm:items-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-dark w-full sm:w-[450px] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[85vh] transform translate-y-full sm:translate-y-10 transition-transform duration-300" id="cartModalContent">
+            
+            <div class="flex justify-between items-center p-4 border-b border-white/10">
+                <h2 class="text-xl font-bold text-white">Моя корзина</h2>
+                <button onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div id="cartItemsContainer" class="p-4 overflow-y-auto flex-grow custom-scrollbar space-y-2">
+                <!-- Cart items or empty state injected here -->
+            </div>
+
+            <div class="p-4 border-t border-white/10 bg-card rounded-b-2xl sm:rounded-b-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-white/80 font-medium text-sm">Итого:</span>
+                    <span id="cartModalTotal" class="text-2xl font-bold text-brand">0₪</span>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="openCheckoutModal()" id="btnCheckout" class="w-full bg-brand text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition shadow-lg shadow-brand/20 disabled:opacity-50 disabled:active:scale-100 disabled:shadow-none">
+                        Оформить заказ
+                    </button>
+                    <button onclick="closeCartModal()" class="w-full bg-white/5 text-white/90 font-medium py-3 rounded-xl active:scale-[0.98] transition border border-white/10">
+                        Продолжить покупки
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 flex justify-center items-end sm:items-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-dark w-full sm:w-[450px] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col max-h-[95vh] transform translate-y-full sm:translate-y-10 transition-transform duration-300" id="checkoutModalContent">
+            
+            <div class="flex justify-between items-center p-4 border-b border-white/10 shrink-0">
+                <div class="flex items-center gap-2">
+                    <button onclick="backToCart()" class="w-8 h-8 rounded-full flex items-center justify-center text-white/80 active:text-white active:scale-95 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+                    </button>
+                    <h2 class="text-xl font-bold text-white">Оформление</h2>
+                </div>
+                <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto flex-grow custom-scrollbar">
+                
+                <!-- Order Type Toggle -->
+                <div class="flex bg-card p-1 rounded-xl mb-6 relative">
+                    <div id="deliverySelector" class="absolute w-[calc(50%-4px)] h-[calc(100%-8px)] bg-brand rounded-lg shadow-sm transition-transform duration-300 top-1 left-1"></div>
+                    <button type="button" onclick="setOrderType('delivery')" class="flex-1 py-2.5 text-sm font-bold text-white z-10 transition-colors" id="btnTypeDelivery">Доставка</button>
+                    <button type="button" onclick="setOrderType('pickup')" class="flex-1 py-2.5 text-sm font-bold text-white/60 z-10 transition-colors" id="btnTypePickup">Самовывоз</button>
+                </div>
+
+                <form id="checkoutForm" class="space-y-4 pb-4">
+                    <!-- General Fields -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Имя и Фамилия <span class="text-brand">*</span></label>
+                        <input type="text" id="custName" required placeholder="Иван Иванов" class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Номер телефона <span class="text-brand">*</span></label>
+                        <input type="tel" id="custPhone" required placeholder="05x-xxxxxxx" class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
+                    </div>
+
+                    <!-- Delivery Fields -->
+                    <div id="deliveryFields" class="space-y-4 transition-all duration-300 origin-top">
+                        <div class="pt-2">
+                            <h3 class="text-sm font-bold text-white/90 mb-2 border-b border-white/10 pb-2 flex items-center justify-between">
+                                Адрес доставки
+                                <span class="text-[10px] bg-brand text-white px-2 py-0.5 rounded-full font-medium">от 250₪ - 0₪</span>
+                            </h3>
+                            <p class="text-[11px] text-muted mb-3 leading-relaxed">
+                                Услуга курьера: <strong class="text-white">30₪</strong><br>
+                                При заказе от 250₪ доставка <strong class="text-[#25D366]">БЕСПЛАТНАЯ!</strong>
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Город, Улица и Дом <span class="text-brand">*</span></label>
+                            <input type="text" id="custAddress" required placeholder="Ашкелон, ул. Бен Гурион 12" class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Квартира</label>
+                                <input type="number" id="custApt" placeholder="№" class="w-full bg-card border border-white/10 rounded-xl px-3 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Этаж</label>
+                                <input type="text" id="custFloor" placeholder="№" class="w-full bg-card border border-white/10 rounded-xl px-3 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Подъезд</label>
+                                <input type="text" id="custEntrance" placeholder="№" class="w-full bg-card border border-white/10 rounded-xl px-3 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="pt-2">
+                        <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide">Комментарий к заказу</label>
+                        <textarea id="custComment" placeholder="Например, без лука, позвонить за 5 минут..." rows="2" class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition resize-none text-sm"></textarea>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="p-4 border-t border-white/10 bg-card rounded-b-2xl sm:rounded-b-2xl shrink-0">
+                <div class="flex flex-col gap-1.5 mb-4">
+                    <div class="flex justify-between text-sm text-white/80">
+                        <span>Сумма заказа:</span>
+                        <span id="checkoutSubtotal">0₪</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-brand font-bold my-0.5" id="checkoutDiscountRow" style="display: none;">
+                        <span>Скидка 2+1:</span>
+                        <span id="checkoutDiscountValue">-0₪</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-white/80" id="checkoutDeliveryRow">
+                        <span>Доставка:</span>
+                        <span id="checkoutDeliveryCost">30₪</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-white pt-2 border-t border-white/5 mt-0.5">
+                        <span>Итого к оплате:</span>
+                        <span id="checkoutTotal" class="text-brand">0₪</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="submitOrder()" class="w-full bg-[#25D366] text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-2">
+                    Отправить в WhatsApp
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>
