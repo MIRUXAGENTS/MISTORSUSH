@@ -37,10 +37,10 @@ const menuData = [
     category: "Напитки",
     categoryEn: "Drinks",
     items: [
-      { id: "d1", name: "Кока-Кола", nameEn: "Coca-Cola", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/coca_cola_p.png" },
-      { id: "d2", name: "Кока-Кола Зеро", nameEn: "Coca-Cola Zero", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/coca_cola_zero_p.png" },
-      { id: "d3", name: "Спрайт", nameEn: "Sprite", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/sprite.png" },
-      { id: "d4", name: "Спрайт Зеро", nameEn: "Sprite Zero", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/sprite_zero.png" }
+      { id: "d1", name: "Кока-Кола", nameEn: "Coca-Cola", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/coca_cola_p.webp" },
+      { id: "d2", name: "Кока-Кола Зеро", nameEn: "Coca-Cola Zero", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/coca_cola_zero_p.webp" },
+      { id: "d3", name: "Спрайт", nameEn: "Sprite", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/sprite.webp" },
+      { id: "d4", name: "Спрайт Зеро", nameEn: "Sprite Zero", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/sprite_zero.webp" }
     ]
   }
 ];
