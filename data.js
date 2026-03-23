@@ -42,5 +42,15 @@ const menuData = [
       { id: "d3", name: "Спрайт", nameEn: "Sprite", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/sprite.webp" },
       { id: "d4", name: "Спрайт Зеро", nameEn: "Sprite Zero", price: 12, ingredients: "0.33 л", ingredientsEn: "0.33 L", image: "img/drinks/sprite_zero.webp" }
     ]
+  },
+  {
+    category: "Соусы",
+    categoryEn: "Sauces",
+    items: [
+      { id: "s1", name: "Соевый соус", nameEn: "Soy Sauce", price: 2, ingredients: "", ingredientsEn: "" },
+      { id: "s2", name: "Соус Терияки", nameEn: "Teriyaki Sauce", price: 2, ingredients: "", ingredientsEn: "" },
+      { id: "s3", name: "Васаби", nameEn: "Wasabi", price: 2, ingredients: "", ingredientsEn: "" },
+      { id: "s4", name: "Имбирь", nameEn: "Ginger", price: 2, ingredients: "", ingredientsEn: "" }
+    ]
   }
 ];

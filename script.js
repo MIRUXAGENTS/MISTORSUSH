@@ -42,6 +42,9 @@ const i18n = {
         deliveryCostLabel: "Доставка:",
         promo2plus1Popup: "Акция 2+1 (Пятница):",
         free: "Бесплатно!",
+        freeKitBanner: "К каждому набору роллов: соя, терияки, васаби и имбирь — ",
+        freeUpper: "БЕСПЛАТНО!",
+        freeKitCartName: "Набор специй (Соя, терияки, васаби, имбирь)",
         whatsappOrderTitle: "*Ваш заказ:*",
         whatsappComment: "💬 *Комментарий:*",
         whatsappDelivery: "🛵 *Доставка:*",
@@ -92,6 +95,9 @@ const i18n = {
         deliveryCostLabel: "Delivery:",
         promo2plus1Popup: "Friday 2+1 Promo:",
         free: "Free!",
+        freeKitBanner: "With every roll: soy, teriyaki, wasabi and ginger — ",
+        freeUpper: "FREE!",
+        freeKitCartName: "Sauce Kit (Soy, teriyaki, wasabi, ginger)",
         whatsappOrderTitle: "*Your Order:*",
         whatsappComment: "💬 *Comment:*",
         whatsappDelivery: "🛵 *Delivery:*",
@@ -163,17 +169,25 @@ function renderMenu() {
     if (!cat) return;
 
     const isClassic = currentCategoryView === 0;
+    const isBaked = currentCategoryView === 1;
     const isDrinks = currentCategoryView === 2;
+    const isSauces = currentCategoryView === 3;
     
-    let cardBgColor = 'bg-[#1c1814]';
-    let cardBorderColor = 'border-[#2e2620]';
+    let cardBgColor = 'bg-card';
+    let cardBorderColor = 'border-white/5';
     
     if (isClassic) {
         cardBgColor = 'bg-[#12141a]';
         cardBorderColor = 'border-[#1e2330]';
+    } else if (isBaked) {
+        cardBgColor = 'bg-[#1c1814]';
+        cardBorderColor = 'border-[#2e2620]';
     } else if (isDrinks) {
         cardBgColor = 'bg-[#2a2d39]';
         cardBorderColor = 'border-[#3a3e4c]';
+    } else if (isSauces) {
+        cardBgColor = 'bg-[#211616]';
+        cardBorderColor = 'border-[#3b2323]';
     }
 
     if (cat.items.length === 0) {
@@ -479,7 +493,10 @@ function renderCartModalItems() {
     
     let totalItems = 0;
     let totalPrice = 0;
+    let totalRolls = 0;
     let html = '';
+    
+    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы").flatMap(c => c.items.map(i => i.id)));
     
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0) {
@@ -487,6 +504,7 @@ function renderCartModalItems() {
             if (item) {
                 totalItems += count;
                 totalPrice += (item.price * count);
+                if (rollCategories.has(id)) totalRolls += count;
                 html += `
                     <div class="flex justify-between items-center py-3 border-b border-white/5 last:border-0">
                         <div class="flex-1 pr-3">
@@ -508,6 +526,23 @@ function renderCartModalItems() {
         }
     }
     
+    if (totalRolls > 0) {
+        html += `
+            <div class="flex justify-between items-center py-3 border-b border-white/5 last:border-0 bg-[#25D366]/5 -mx-4 px-4 border-t border-t-[#25D366]/20 mt-1">
+                <div class="flex-1 pr-3 flex items-center gap-3">
+                    <span class="text-xl drop-shadow-sm">🎁</span>
+                    <div>
+                        <h4 class="text-[13px] font-bold text-white/90 leading-tight">${i18n[currentLang].freeKitCartName}</h4>
+                        <span class="text-[#25D366] font-bold mt-0.5 inline-block text-[12px] uppercase">0₪</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center shrink-0 min-w-8 h-8 px-2 rounded-full bg-white/5 text-white/60 text-xs font-bold ring-1 ring-white/10">
+                    x${totalRolls}
+                </div>
+            </div>
+        `;
+    }
+
     if (totalItems === 0) {
         container.innerHTML = `
             <div class="flex flex-col items-center justify-center h-48 text-center pt-8">
@@ -678,6 +713,9 @@ function submitOrder() {
     }
     
     let totalPrice = 0;
+    let totalRolls = 0;
+    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы").flatMap(c => c.items.map(i => i.id)));
+
     orderText += `${i18n[currentLang].whatsappOrderTitle}\n`;
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0) {
@@ -686,10 +724,15 @@ function submitOrder() {
                 const itemName = currentLang === 'en' ? item.nameEn : item.name;
                 orderText += `— ${itemName} x${count} (${item.price * count}₪) \n`;
                 totalPrice += (item.price * count);
+                if (rollCategories.has(id)) totalRolls += count;
             }
         }
     }
     
+    if (totalRolls > 0) {
+        orderText += `— 🎁 ${i18n[currentLang].freeKitCartName} x${totalRolls} (0₪)\n`;
+    }
+
     const discount = calculateDiscount();
     if (discount > 0) {
         orderText += `\n${i18n[currentLang].whatsappPromo} -${discount}₪\n`;
