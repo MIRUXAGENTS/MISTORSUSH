@@ -3,34 +3,61 @@ const menuData = [
     category: "Классические роллы",
     categoryEn: "Classic Rolls",
     items: [
-      { id: "c1", name: "Ролл маки с лососем", nameEn: "Salmon Maki Roll", price: 25, ingredients: "Рис, нори, лосось", ingredientsEn: "Rice, nori, salmon" },
-      { id: "c2", name: "Ролл маки с тунцом", nameEn: "Tuna Maki Roll", price: 25, ingredients: "Рис, нори, тунец", ingredientsEn: "Rice, nori, tuna" },
-      { id: "c3", name: "Маки соломон-авокадо", nameEn: "Salmon-Avocado Maki", price: 27, ingredients: "Рис, нори, лосось, авокадо", ingredientsEn: "Rice, nori, salmon, avocado" },
-      { id: "c4", name: "Ролл маки с креветкой", nameEn: "Shrimp Maki Roll", price: 30, ingredients: "Рис, нори, креветка", ingredientsEn: "Rice, nori, shrimp" },
-      { id: "c5", name: "Филадельфия с манго", nameEn: "Philadelphia with Mango", price: 51, ingredients: "Рис, нори, кремчиз, соломон, манго", ingredientsEn: "Rice, nori, cream cheese, salmon, mango" },
-      { id: "c6", name: "Филадельфия с огурцом", nameEn: "Philadelphia with Cucumber", price: 48, ingredients: "Рис, нори, лосось, кремчиз, огурец", ingredientsEn: "Rice, nori, salmon, cream cheese, cucumber" },
-      { id: "c7", name: "Филадельфия с авокадо", nameEn: "Philadelphia with Avocado", price: 50, ingredients: "Рис, нори, лосось, кремчиз, авокадо", ingredientsEn: "Rice, nori, salmon, cream cheese, avocado" },
-      { id: "c8", name: "Филадельфия с крабовыми палочками", nameEn: "Philadelphia with Crab Sticks", price: 50, ingredients: "Рис, нори, лосось, кремчиз, крабовые палочки, огурец", ingredientsEn: "Rice, nori, salmon, cream cheese, crab sticks, cucumber" }
+      { id: "c1", name: "Маки Лосось", nameEn: "Salmon Maki", price: 30, ingredients: "", ingredientsEn: "" },
+      { id: "c2", name: "Маки Авокадо", nameEn: "Avocado Maki", price: 28, ingredients: "", ingredientsEn: "" },
+      { id: "c3", name: "Маки Кампье", nameEn: "Kampye Maki", price: 25, ingredients: "", ingredientsEn: "" },
+      { id: "c4", name: "Маки Огурец", nameEn: "Cucumber Maki", price: 25, ingredients: "", ingredientsEn: "" },
+      { id: "c5", name: "Маки Морковка", nameEn: "Carrot Maki", price: 25, ingredients: "", ingredientsEn: "" },
+      { id: "c6", name: "Маки Ассорти", nameEn: "Assorted Maki", price: 35, ingredients: "", ingredientsEn: "" },
+      { id: "c7", name: "Филадельфия", nameEn: "Philadelphia", price: 45, ingredients: "Рис, огурец, кремчиз, лосось сверху", ingredientsEn: "Rice, cucumber, cream cheese, salmon on top" },
+      { id: "c8", name: "Филадельфия Крабовые палочки", nameEn: "Crab Stick Philadelphia", price: 50, ingredients: "Рис, огурец, кремчиз, крабовые палочки, лосось сверху", ingredientsEn: "Rice, cucumber, cream cheese, crab sticks, salmon on top" },
+      { id: "c9", name: "Филадельфия Лосось", nameEn: "Salmon Philadelphia", price: 50, ingredients: "Рис, лосось, огурец, кремчиз, лосось сверху", ingredientsEn: "Rice, salmon, cucumber, cream cheese, salmon on top" },
+      { id: "c10", name: "Филадельфия Авокадо", nameEn: "Avocado Philadelphia", price: 55, ingredients: "Рис, авокадо, огурец, кремчиз, лосось сверху", ingredientsEn: "Rice, avocado, cucumber, cream cheese, salmon on top" },
+      { id: "c11", name: "Филадельфия Осмаленная", nameEn: "Seared Philadelphia", price: 50, ingredients: "Рис, огурец, кремчиз, лосось сверху", ingredientsEn: "Rice, cucumber, cream cheese, salmon on top" },
+      { id: "c12", name: "Филадельфия Тамаго", nameEn: "Philadelphia Tamago", price: 45, ingredients: "Рис, омлет тамаго, огурец, кремчиз, лосось сверху", ingredientsEn: "Rice, tamago omelet, cucumber, cream cheese, salmon on top" },
+      { id: "c13", name: "Зеленый дракон", nameEn: "Green Dragon", price: 60, ingredients: "Рис, огурец, кремчиз, лосось сверху, авокадо, терияки, кунжут", ingredientsEn: "Rice, cucumber, cream cheese, salmon on top, covered with avocado, teriyaki sauce, sesame" },
+      { id: "c14", name: "Красный дракон", nameEn: "Red Dragon", price: 65, ingredients: "Рис, укроп, кремчиз, лосось сверху, шапка из икры", ingredientsEn: "Rice, dill, cream cheese, salmon on top, caviar topping" },
+      { id: "c15", name: "Креветка Панко (не жаренный)", nameEn: "Panko Shrimp (non-fried)", price: 45, ingredients: "Рис, кремчиз, креветка, хасса, панировочные сухари", ingredientsEn: "Rice, cream cheese, shrimp, lettuce, breadcrumbs" },
+      { id: "c16", name: "Лосось Панко (не жаренный)", nameEn: "Panko Salmon (non-fried)", price: 50, ingredients: "Рис, кремчиз, лосось, хасса, панировочные сухари", ingredientsEn: "Rice, cream cheese, salmon, lettuce, breadcrumbs" },
+      { id: "c17", name: "Сырная креветка", nameEn: "Cheese Shrimp", price: 50, ingredients: "Рис, кремчиз, креветка, огурец, сыр чеддер сверху", ingredientsEn: "Rice, cream cheese, shrimp, cucumber, cheddar cheese on top" },
+      { id: "c18", name: "Закрытый грибник", nameEn: "Hidden Mushroom", price: 55, ingredients: "Рис, кремчиз, огурец, грибы шампиньоны (жаренные)", ingredientsEn: "Rice, cream cheese, cucumber, fried mushrooms" },
+      { id: "c19", name: "Веганский рай", nameEn: "Vegan Paradise", price: 45, ingredients: "Рис, морковка, батат (запеченный), огурец, хасса, кампье", ingredientsEn: "Rice, carrot, sweet potato (baked), cucumber, lettuce, kanpyo" },
+      { id: "c20", name: "Морской бриз", nameEn: "Sea Breeze", price: 55, ingredients: "Рис, креветка, кремчиз, сверху морская капуста, кунжут", ingredientsEn: "Rice, shrimp, cream cheese, seaweed on top, sesame" },
+      { id: "c21", name: "Калифорния", nameEn: "California", price: 60, ingredients: "Рис, лосось, кремчиз, огурец, сверху оранжевая тобика", ingredientsEn: "Rice, salmon, cream cheese, cucumber, orange tobiko on top" }
     ]
   },
   {
     category: "Запеченные роллы",
     categoryEn: "Baked Rolls",
     items: [
-      { id: "z1", name: "Ролл грибной", nameEn: "Mushroom Roll", price: 50, ingredients: "Рис, нори, грибы Шампиньоны, кремчиз, перец болгарский красный, помидор, кунжут, сырный соус", ingredientsEn: "Rice, nori, mushrooms, cream cheese, red bell pepper, tomato, sesame, cheese sauce" },
-      { id: "z2", name: "Ролл Белый самурай", nameEn: "White Samurai Roll", price: 60, ingredients: "Рис, нори, лосось, омлет Тамаго, креветка, сырный соус, соус Терияки", ingredientsEn: "Rice, nori, salmon, tamago omelet, shrimp, cheese sauce, teriyaki sauce" },
-      { id: "z3", name: "Авокадо хакаси", nameEn: "Avocado Hakasi", price: 55, ingredients: "Рис, нори, лосось, кремчиз, огурец, авокадо, сырный соус, морковка", ingredientsEn: "Rice, nori, salmon, cream cheese, cucumber, avocado, cheese sauce, carrots" },
-      { id: "p1", name: "Вегетарианский бум", nameEn: "Vegetarian Boom", price: 36, ingredients: "Рис, нори, перец красный болгарский, огурец, салат зеленый, авокадо, кунжут", ingredientsEn: "Rice, nori, red bell pepper, cucumber, green lettuce, avocado, sesame" },
-      { id: "p2", name: "Миндальный ушутоми", nameEn: "Almond Ushutomi", price: 59, ingredients: "Рис, нори, лосось, огурец, кремчиз, соус Терияки, миндаль", ingredientsEn: "Rice, nori, salmon, cucumber, cream cheese, teriyaki sauce, almonds" },
-      { id: "p3", name: "Фотумаки шамп", nameEn: "Futomaki Champ", price: 40, ingredients: "Рис, нори, омлет Томаго, огурец, грибы Шампиньоны (жареные)", ingredientsEn: "Rice, nori, tamago omelet, cucumber, fried mushrooms" },
-      { id: "p4", name: "Чиз ролл с креветкой", nameEn: "Cheese Roll with Shrimp", price: 55, ingredients: "Рис, нори, креветка, огурец, сыр сливочный, сыр Чеддер", ingredientsEn: "Rice, nori, shrimp, cucumber, cream cheese, cheddar cheese" },
-      { id: "p5", name: "Лосось панко", nameEn: "Salmon Panko", price: 47, ingredients: "Рис, нори, лосось слабосолёный, огурец, сливочный сыр, панировочные сухари", ingredientsEn: "Rice, nori, lightly salted salmon, cucumber, cream cheese, breadcrumbs" },
-      { id: "p6", name: "Новый год", nameEn: "New Year", price: 60, ingredients: "Рис, нори, лосось, кремчиз, укроп, икра лосося", ingredientsEn: "Rice, nori, salmon, cream cheese, dill, salmon caviar" },
-      { id: "p7", name: "Филадельфия с креветкой", nameEn: "Philadelphia with Shrimp", price: 55, ingredients: "Рис, нори, лосось, кремчиз, огурец, креветки", ingredientsEn: "Rice, nori, salmon, cream cheese, cucumber, shrimp" },
-      { id: "p8", name: "Травенной ясай маки", nameEn: "Herbal Yasai Maki", price: 55, ingredients: "Рис, нори, огурец, помидор, красный перец болгарский, салат зеленый, кунжут", ingredientsEn: "Rice, nori, cucumber, tomato, red bell pepper, green lettuce, sesame" },
-      { id: "p9", name: "Зелёный дракон", nameEn: "Green Dragon", price: 57, ingredients: "Рис, нори, лосось, сливочный сыр, огурец, покрыт авокадо, соус Терияки, кунжут", ingredientsEn: "Rice, nori, salmon, cream cheese, cucumber, covered with avocado, teriyaki sauce, sesame" },
-      { id: "p10", name: "Креветка панко", nameEn: "Shrimp Panko", price: 45, ingredients: "Рис, нори, креветка, сливочный сыр, салат зеленый, панировочные сухари", ingredientsEn: "Rice, nori, shrimp, cream cheese, green lettuce, breadcrumbs" },
-      { id: "p11", name: "Филадельфия с соломоном", nameEn: "Philadelphia with Salmon", price: 50, ingredients: "Рис, нори, кремчиз, соломон, огурец", ingredientsEn: "Rice, nori, cream cheese, salmon, cucumber" }
+      { id: "z1", name: "Грибной Амур", nameEn: "Mushroom Amur", price: 60, ingredients: "Рис, грибы шампиньоны, кремчиз, красный болгарский перец, помидор, сырная шапка", ingredientsEn: "Rice, mushrooms, cream cheese, red bell pepper, tomato, cheese topping" },
+      { id: "z2", name: "Белый самурай", nameEn: "White Samurai", price: 60, ingredients: "Рис, лосось, омлет тамаго, креветка, сырная шапка, сверху кунжут и терияки", ingredientsEn: "Rice, salmon, tamago omelet, shrimp, cheese topping, sesame and teriyaki on top" },
+      { id: "z3", name: "Бурный авокадо", nameEn: "Stormy Avocado", price: 60, ingredients: "Рис, лосось, авокадо, морковка, огурец, сырная шапка", ingredientsEn: "Rice, salmon, avocado, carrot, cucumber, cheese topping" },
+      { id: "z4", name: "Веган бум", nameEn: "Vegan Boom", price: 55, ingredients: "Рис, авокадо, морковка, огурец, кампье, хасса, сырная шапка, терияки и кунжут", ingredientsEn: "Rice, avocado, carrot, cucumber, kanpyo, lettuce, cheese topping, teriyaki and sesame" }
+    ]
+  },
+  {
+    category: "Необычные роллы",
+    categoryEn: "Unusual Rolls",
+    items: [
+      { id: "u1", name: "Закрытый лосось", nameEn: "Hidden Salmon", price: 60, ingredients: "Лосось, кремчиз, огурец, лосось", ingredientsEn: "Salmon, cream cheese, cucumber, salmon" },
+      { id: "u2", name: "Ошаленный ролл", nameEn: "Crazy Roll", price: 55, ingredients: "Лосось, кремчиз, огурец, огурец", ingredientsEn: "Salmon, cream cheese, cucumber, cucumber" },
+      { id: "u3", name: "Наглая креветка", nameEn: "Cheeky Shrimp", price: 55, ingredients: "Креветка, кремчиз, огурец, огурец", ingredientsEn: "Shrimp, cream cheese, cucumber, cucumber" },
+      { id: "u4", name: "Веган", nameEn: "Vegan", price: 45, ingredients: "Огурец, морковка, помидор, хасса, омлет тамаго", ingredientsEn: "Cucumber, carrot, tomato, lettuce, tamago omelet" }
+    ]
+  },
+  {
+    category: "Рисовые гамбургеры",
+    categoryEn: "Rice Burgers",
+    items: [
+      { id: "b1", name: "Рисовый гамбургер", nameEn: "Rice Burger", price: 55, ingredients: "Начинки на выбор. Жаренные появятся позже", ingredientsEn: "Choice of fillings. Fried options coming soon" }
+    ]
+  },
+  {
+    category: "Гункан и суши",
+    categoryEn: "Gunkan and Sushi",
+    items: [
+      { id: "g1", name: "Гункан и суши", nameEn: "Gunkan and Sushi", price: 50, ingredients: "Начинки на выбор. Жаренные появятся позже", ingredientsEn: "Choice of fillings. Fried options coming soon" }
     ]
   },
   {
@@ -47,10 +74,10 @@ const menuData = [
     category: "Соусы",
     categoryEn: "Sauces",
     items: [
-      { id: "s1", name: "Соевый соус", nameEn: "Soy Sauce", price: 2, ingredients: "", ingredientsEn: "" },
-      { id: "s2", name: "Соус Терияки", nameEn: "Teriyaki Sauce", price: 2, ingredients: "", ingredientsEn: "" },
-      { id: "s3", name: "Васаби", nameEn: "Wasabi", price: 2, ingredients: "", ingredientsEn: "" },
-      { id: "s4", name: "Имбирь", nameEn: "Ginger", price: 2, ingredients: "", ingredientsEn: "" }
+      { id: "s1", name: "Соевый соус", nameEn: "Soy Sauce", price: 2, ingredients: "", ingredientsEn: "", image: "img/sause/Soy_Sauce.webp" },
+      { id: "s2", name: "Соус Терияки", nameEn: "Teriyaki Sauce", price: 2, ingredients: "", ingredientsEn: "", image: "img/sause/Teriyaki_Sauce.webp" },
+      { id: "s3", name: "Васаби", nameEn: "Wasabi", price: 2, ingredients: "", ingredientsEn: "", image: "img/sause/wasabi.webp" },
+      { id: "s4", name: "Имбирь", nameEn: "Ginger", price: 2, ingredients: "", ingredientsEn: "", image: "img/sause/ginger.webp" }
     ]
   }
 ];

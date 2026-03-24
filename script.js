@@ -1,6 +1,8 @@
-let cart = {}; 
+let cart = {};
 let currentLang = localStorage.getItem('lang') || 'ru';
 let currentCategoryView = 0;
+let isSearchActive = false;
+let searchQuery = '';
 
 const i18n = {
     ru: {
@@ -57,7 +59,10 @@ const i18n = {
         whatsappEnt: "Подъезд",
         upsellTitle: "Не забудьте добавить",
         upsellNoThanks: "Спасибо, не в этот раз",
-        upsellCheckoutBtn: "Перейти в корзину"
+        upsellCheckoutBtn: "Перейти в корзину",
+        searchPlaceholder: "Поиск...",
+        searchResults: "Результаты поиска",
+        noResults: "Ничего не найдено :("
     },
     en: {
         subtitle: "Sushi in Ashkelon",
@@ -113,7 +118,10 @@ const i18n = {
         whatsappEnt: "Ent.",
         upsellTitle: "Don't forget to add",
         upsellNoThanks: "No thanks",
-        upsellCheckoutBtn: "Go to cart"
+        upsellCheckoutBtn: "Go to cart",
+        searchPlaceholder: "Search...",
+        searchResults: "Search Results",
+        noResults: "Nothing found :("
     }
 };
 
@@ -156,10 +164,15 @@ function init() {
     updateCartWidget();
 }
 
+function getCategoryOfItem(id) {
+    const cat = menuData.find(c => c.items.some(i => i.id === id));
+    return cat ? cat.category : "";
+}
+
 function renderNav() {
     const nav = document.getElementById('categoryNav');
     nav.innerHTML = menuData.map((cat, index) => {
-        const isActive = index === currentCategoryView;
+        const isActive = !isSearchActive && index === currentCategoryView;
         const activeClass = isActive ? 'text-brand border-brand/30 bg-brand/10' : 'text-muted border-white/5 bg-card hover:bg-white/5';
         return `
         <button onclick="selectCategory(${index})" class="category-link whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition-colors duration-200 ${activeClass}">
@@ -171,43 +184,73 @@ function renderNav() {
 
 function renderMenu() {
     const container = document.getElementById('menuContainer');
-    const cat = menuData[currentCategoryView];
-    if (!cat) return;
 
-    const isClassic = currentCategoryView === 0;
-    const isBaked = currentCategoryView === 1;
-    const isDrinks = currentCategoryView === 2;
-    const isSauces = currentCategoryView === 3;
-    
-    let cardBgColor = 'bg-card';
-    let cardBorderColor = 'border-white/5';
-    
-    if (isClassic) {
-        cardBgColor = 'bg-[#12141a]';
-        cardBorderColor = 'border-[#1e2330]';
-    } else if (isBaked) {
-        cardBgColor = 'bg-[#1c1814]';
-        cardBorderColor = 'border-[#2e2620]';
-    } else if (isDrinks) {
-        cardBgColor = 'bg-[#2a2d39]';
-        cardBorderColor = 'border-[#3a3e4c]';
-    } else if (isSauces) {
-        cardBgColor = 'bg-[#211616]';
-        cardBorderColor = 'border-[#3b2323]';
+    let itemsToRender = [];
+    let sectionTitle = '';
+    let bgColor = 'bg-card';
+    let borderColor = 'border-white/5';
+
+    if (isSearchActive) {
+        sectionTitle = i18n[currentLang].searchResults;
+        menuData.forEach(cat => {
+            cat.items.forEach(item => {
+                const nameMatch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+                const enMatch = (item.nameEn || '').toLowerCase().includes(searchQuery.toLowerCase());
+                if (nameMatch || enMatch) {
+                    itemsToRender.push(item);
+                }
+            });
+        });
+    } else {
+        const cat = menuData[currentCategoryView];
+        if (!cat) return;
+        sectionTitle = currentLang === 'en' ? cat.categoryEn : cat.category;
+        itemsToRender = cat.items;
+
+        const isClassic = currentCategoryView === 0;
+        const isBaked = currentCategoryView === 1;
+        const isUnusual = currentCategoryView === 2;
+        const isBurgers = currentCategoryView === 3;
+        const isGunkan = currentCategoryView === 4;
+        const isDrinks = currentCategoryView === 5;
+        const isSauces = currentCategoryView === 6;
+
+        if (isClassic) {
+            bgColor = 'bg-[#12141a]';
+            borderColor = 'border-[#1e2330]';
+        } else if (isBaked) {
+            bgColor = 'bg-[#1c1814]';
+            borderColor = 'border-[#2e2620]';
+        } else if (isUnusual) {
+            bgColor = 'bg-[#1c1a14]';
+            borderColor = 'border-[#423821]';
+        } else if (isBurgers) {
+            bgColor = 'bg-[#1e1c16]';
+            borderColor = 'border-[#332b21]';
+        } else if (isGunkan) {
+            bgColor = 'bg-[#181a1d]';
+            borderColor = 'border-[#252a33]';
+        } else if (isDrinks) {
+            bgColor = 'bg-[#2a2d39]';
+            borderColor = 'border-[#3a3e4c]';
+        } else if (isSauces) {
+            bgColor = 'bg-[#211616]';
+            borderColor = 'border-[#3b2323]';
+        }
     }
 
-    if (cat.items.length === 0) {
+    if (itemsToRender.length === 0) {
         container.innerHTML = `
-        <section id="cat-${currentCategoryView}" class="menu-section animate-fade-in">
+        <section class="menu-section animate-fade-in">
             <h2 class="text-2xl font-bold mb-6 tracking-tight text-white/95 flex items-center justify-center gap-4 text-center uppercase text-[22px]">
                 <div class="h-px bg-white/10 flex-grow"></div>
-                ${currentLang === 'en' ? cat.categoryEn : cat.category}
+                ${sectionTitle}
                 <div class="h-px bg-white/10 flex-grow"></div>
             </h2>
             <div class="text-center py-16 text-muted bg-card/50 rounded-2xl border border-white/5 shadow-inner">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mx-auto mb-3 opacity-20"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                <p class="font-medium tracking-wider text-sm uppercase">Пока пусто</p>
-                <p class="text-xs opacity-50 mt-1">Скоро мы добавим сюда товары</p>
+                <p class="font-medium tracking-wider text-sm uppercase">${isSearchActive ? i18n[currentLang].noResults : 'Пока пусто'}</p>
+                ${!isSearchActive ? '<p class="text-xs opacity-50 mt-1">Скоро мы добавим сюда товары</p>' : ''}
             </div>
         </section>
         `;
@@ -215,16 +258,35 @@ function renderMenu() {
     }
 
     container.innerHTML = `
-    <section id="cat-${currentCategoryView}" class="menu-section animate-fade-in">
+    <section class="menu-section animate-fade-in">
         <h2 class="text-2xl font-bold mb-6 tracking-tight text-white/95 flex items-center justify-center gap-4 text-center uppercase text-[22px]">
             <div class="h-px bg-white/10 flex-grow"></div>
-            ${currentLang === 'en' ? cat.categoryEn : cat.category}
+            ${sectionTitle}
             <div class="h-px bg-white/10 flex-grow"></div>
         </h2>
         
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            ${cat.items.map(item => `
-                <div class="product-card flex flex-col justify-between ${cardBgColor} p-4 rounded-2xl border ${cardBorderColor} shadow-lg shadow-black/30">
+            ${itemsToRender.map(item => {
+        const isUnusualItem = getCategoryOfItem(item.id) === "Необычные роллы";
+        const shadowClass = isUnusualItem ? 'shadow-[0_0_20px_rgba(218,165,32,0.15)] shadow-black/40' : 'shadow-lg shadow-black/30';
+
+        // If searching, we may have mixed categories, so we dynamically pick background
+        let itemBg = bgColor;
+        let itemBorder = borderColor;
+
+        if (isSearchActive) {
+            const catName = getCategoryOfItem(item.id);
+            if (catName === "Классические роллы") { itemBg = 'bg-[#12141a]'; itemBorder = 'border-[#1e2330]'; }
+            else if (catName === "Запеченные роллы") { itemBg = 'bg-[#1c1814]'; itemBorder = 'border-[#2e2620]'; }
+            else if (catName === "Необычные роллы") { itemBg = 'bg-[#1c1a14]'; itemBorder = 'border-[#423821]'; }
+            else if (catName === "Рисовые гамбургеры") { itemBg = 'bg-[#1e1c16]'; itemBorder = 'border-[#332b21]'; }
+            else if (catName === "Гункан и суши") { itemBg = 'bg-[#181a1d]'; itemBorder = 'border-[#252a33]'; }
+            else if (catName === "Напитки") { itemBg = 'bg-[#2a2d39]'; itemBorder = 'border-[#3a3e4c]'; }
+            else if (catName === "Соусы") { itemBg = 'bg-[#211616]'; itemBorder = 'border-[#3b2323]'; }
+        }
+
+        return `
+                <div class="product-card flex flex-col justify-between ${itemBg} p-4 rounded-2xl border ${itemBorder} ${shadowClass}">
                     ${item.image ? `<div class="w-full flex justify-center mb-3"><img src="${item.image}" alt="${item.name}" class="h-28 object-contain drop-shadow-md"></div>` : ''}
                     <div class="mb-3">
                         <h3 class="font-bold text-[17px] leading-snug mb-1.5 text-white/95">${currentLang === 'en' ? item.nameEn : item.name}</h3>
@@ -233,13 +295,12 @@ function renderMenu() {
                     <div class="flex justify-between items-center pt-3 border-t border-white/5 mt-auto">
                         <span class="font-bold text-lg text-brand">${item.price}₪</span>
                         <div class="cart-controls" id="controls-${item.id}">
-                            <button class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center active:scale-95 transition shadow-lg shadow-brand/30" onclick="addToCart('${item.id}')">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                            </button>
+                            ${renderControlsHTML(item.id)}
                         </div>
                     </div>
                 </div>
-            `).join('')}
+                `;
+    }).join('')}
         </div>
     </section>
     `;
@@ -248,14 +309,32 @@ function renderMenu() {
 function renderDrawer() {
     const container = document.getElementById('drawerLinks');
     if (!container) return;
-    
+
+    const icons = {
+        "Классические роллы": "🍣",
+        "Запеченные роллы": "🔥",
+        "Необычные роллы": "✨",
+        "Рисовые гамбургеры": "🍔",
+        "Гункан и суши": "🥢",
+        "Напитки": "🥤",
+        "Соусы": "🍶"
+    };
+
     container.innerHTML = menuData.map((cat, index) => {
-        const isActive = index === currentCategoryView;
-        const activeClass = isActive ? 'bg-brand/10 text-brand border-brand/30' : 'bg-transparent text-white/80 border-transparent hover:bg-white/5';
+        const isActive = !isSearchActive && index === currentCategoryView;
+        const icon = icons[cat.category] || "🍱";
+        const activeClass = isActive
+            ? 'bg-brand/10 text-brand border-brand/30 shadow-[inset_0_0_20px_rgba(230,57,70,0.05)]'
+            : 'bg-transparent text-white/80 border-transparent hover:bg-white/5 hover:translate-x-1';
+
         return `
-        <button onclick="selectCategory(${index})" class="w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex items-center justify-between group ${activeClass}">
-            <span class="font-semibold text-sm tracking-wide uppercase">${currentLang === 'en' ? cat.categoryEn : cat.category}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 ${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+        <button onclick="selectCategory(${index})" class="w-full text-left px-4 py-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 group ${activeClass}">
+            <span class="text-2xl group-hover:scale-110 transition-transform duration-300">${icon}</span>
+            <div class="flex flex-col">
+                <span class="font-bold text-[13px] tracking-wider uppercase">${currentLang === 'en' ? cat.categoryEn : cat.category}</span>
+                <span class="text-[10px] text-muted font-medium uppercase tracking-widest mt-0.5 opacity-60">${cat.items.length} ${currentLang === 'en' ? 'items' : 'позиций'}</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 ml-auto ${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
         </button>
         `;
     }).join('');
@@ -263,6 +342,10 @@ function renderDrawer() {
 
 function selectCategory(index) {
     currentCategoryView = index;
+    isSearchActive = false;
+    searchQuery = '';
+    const searchInput = document.getElementById('menuSearch');
+    if (searchInput) searchInput.value = '';
     renderNav();
     renderMenu();
     renderDrawer();
@@ -274,12 +357,12 @@ function openDrawer() {
     const drawer = document.getElementById('navDrawer');
     const overlay = document.getElementById('drawerOverlay');
     const content = document.getElementById('drawerContent');
-    if(!drawer) return;
-    
+    if (!drawer) return;
+
     drawer.classList.remove('pointer-events-none');
     overlay.classList.remove('opacity-0', 'pointer-events-none');
     overlay.classList.add('opacity-100', 'pointer-events-auto');
-    
+
     content.classList.remove('-translate-x-full');
 }
 
@@ -287,15 +370,15 @@ function closeDrawer() {
     const drawer = document.getElementById('navDrawer');
     const overlay = document.getElementById('drawerOverlay');
     const content = document.getElementById('drawerContent');
-    if(!drawer) return;
-    
+    if (!drawer) return;
+
     overlay.classList.remove('opacity-100', 'pointer-events-auto');
     overlay.classList.add('opacity-0', 'pointer-events-none');
-    
+
     content.classList.add('-translate-x-full');
-    
+
     setTimeout(() => {
-        if(overlay.classList.contains('opacity-0')) {
+        if (overlay.classList.contains('opacity-0')) {
             drawer.classList.add('pointer-events-none');
         }
     }, 300);
@@ -328,7 +411,7 @@ async function verifyPromoDay() {
         isPromoActive = (new Date().getDay() === 5);
     }
     promoChecked = true;
-    
+
     // Once checked, refresh the UI if there are items
     updateCartWidget();
     const cartModal = document.getElementById('cartModal');
@@ -346,12 +429,12 @@ verifyPromoDay();
 
 function calculateDiscount() {
     if (!promoChecked || !isPromoActive) return 0;
-    
+
     const bakedCat = menuData.find(c => c.category === "Запеченные роллы");
     if (!bakedCat) return 0;
-    
+
     const bakedIds = new Set(bakedCat.items.map(i => i.id));
-    
+
     let bakedPrices = [];
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0 && bakedIds.has(id)) {
@@ -363,12 +446,12 @@ function calculateDiscount() {
             }
         }
     }
-    
+
     const freeCount = Math.floor(bakedPrices.length / 3);
     if (freeCount === 0) return 0;
-    
+
     bakedPrices.sort((a, b) => a - b);
-    
+
     let discount = 0;
     for (let i = 0; i < freeCount; i++) {
         discount += bakedPrices[i];
@@ -376,33 +459,10 @@ function calculateDiscount() {
     return discount;
 }
 
-function addToCart(id) {
-    if (!cart[id]) cart[id] = 0;
-    cart[id]++;
-    renderControls(id);
-    updateCartWidget();
-    
-    if (navigator.vibrate) navigator.vibrate(50);
-}
-
-function removeFromCart(id) {
-    if (cart[id]) {
-        cart[id]--;
-        if (cart[id] === 0) delete cart[id];
-    }
-    renderControls(id);
-    updateCartWidget();
-    
-    if (navigator.vibrate) navigator.vibrate(50);
-}
-
-function renderControls(id) {
-    const el = document.getElementById(`controls-${id}`);
-    if (!el) return;
-    
+function renderControlsHTML(id) {
     const count = cart[id] || 0;
     if (count > 0) {
-        el.innerHTML = `
+        return `
             <div class="flex items-center bg-dark rounded-full p-0.5 border border-white/10 shadow-inner">
                 <button class="w-7 h-7 flex items-center justify-center text-muted active:text-white" onclick="removeFromCart('${id}')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
@@ -414,7 +474,7 @@ function renderControls(id) {
             </div>
         `;
     } else {
-        el.innerHTML = `
+        return `
             <button class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center active:scale-95 transition shadow-lg shadow-brand/30" onclick="addToCart('${id}')">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
             </button>
@@ -422,15 +482,38 @@ function renderControls(id) {
     }
 }
 
+function renderControls(id) {
+    const el = document.getElementById(`controls-${id}`);
+    if (!el) return;
+    el.innerHTML = renderControlsHTML(id);
+}
+
+function handleSearch(query) {
+    searchQuery = query.trim();
+    isSearchActive = searchQuery.length > 0;
+    renderMenu();
+    renderNav();
+    if (isSearchActive) {
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+}
+
+function clearSearch() {
+    const input = document.getElementById('menuSearch');
+    if (input) input.value = '';
+    handleSearch('');
+    closeDrawer();
+}
+
 function updateCartWidget() {
     const cartCountEl = document.getElementById('cartCount');
     const cartTotalEl = document.getElementById('cartTotal');
     const headerCartCountEl = document.getElementById('headerCartCount');
     const widget = document.getElementById('cartWidget');
-    
+
     let totalItems = 0;
     let totalPrice = 0;
-    
+
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0) {
             const item = getItem(id);
@@ -440,12 +523,12 @@ function updateCartWidget() {
             }
         }
     }
-    
+
     totalPrice -= calculateDiscount();
-    
+
     if (cartCountEl) cartCountEl.textContent = totalItems;
     if (cartTotalEl) cartTotalEl.textContent = `${totalPrice}₪`;
-    
+
     if (widget) {
         if (totalItems > 0) {
             widget.classList.remove('translate-y-[150%]');
@@ -470,8 +553,8 @@ function openCartModal() {
     const modal = document.getElementById('cartModal');
     const content = document.getElementById('cartModalContent');
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    
-    if(window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
         content.classList.remove('translate-y-full');
     } else {
         content.classList.remove('sm:translate-y-10');
@@ -483,8 +566,8 @@ function closeCartModal() {
     const modal = document.getElementById('cartModal');
     const content = document.getElementById('cartModalContent');
     modal.classList.add('opacity-0', 'pointer-events-none');
-    
-    if(window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
         content.classList.add('translate-y-full');
     } else {
         content.classList.remove('sm:translate-y-0');
@@ -496,14 +579,14 @@ function renderCartModalItems() {
     const container = document.getElementById('cartItemsContainer');
     const totalEl = document.getElementById('cartModalTotal');
     const btnCheckout = document.getElementById('btnCheckout');
-    
+
     let totalItems = 0;
     let totalPrice = 0;
     let totalRolls = 0;
     let html = '';
-    
-    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы").flatMap(c => c.items.map(i => i.id)));
-    
+
+    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы" || c.category === "Необычные роллы").flatMap(c => c.items.map(i => i.id)));
+
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0) {
             const item = getItem(id);
@@ -531,7 +614,7 @@ function renderCartModalItems() {
             }
         }
     }
-    
+
     if (totalRolls > 0) {
         html += `
             <div class="flex justify-between items-center py-3 border-b border-white/5 last:border-0 bg-[#25D366]/5 -mx-4 px-4 border-t border-t-[#25D366]/20 mt-1">
@@ -575,11 +658,11 @@ function renderCartModalItems() {
         container.innerHTML = html;
         btnCheckout.disabled = false;
     }
-    
+
     totalEl.textContent = `${totalPrice}₪`;
 }
 
-let orderType = 'delivery'; 
+let orderType = 'delivery';
 
 function updateCheckoutSummary() {
     let subtotal = 0;
@@ -589,19 +672,19 @@ function updateCheckoutSummary() {
             if (item) subtotal += (item.price * count);
         }
     }
-    
+
     const subtotalEl = document.getElementById('checkoutSubtotal');
     const discountRow = document.getElementById('checkoutDiscountRow');
     const discountValueEl = document.getElementById('checkoutDiscountValue');
     const deliveryRow = document.getElementById('checkoutDeliveryRow');
     const deliveryCostEl = document.getElementById('checkoutDeliveryCost');
     const totalEl = document.getElementById('checkoutTotal');
-    
+
     if (subtotalEl) subtotalEl.textContent = `${subtotal}₪`;
-    
+
     const discount = calculateDiscount();
     const finalSubtotal = subtotal - discount;
-    
+
     if (discountRow) {
         if (discount > 0) {
             discountRow.style.display = 'flex';
@@ -610,7 +693,7 @@ function updateCheckoutSummary() {
             discountRow.style.display = 'none';
         }
     }
-    
+
     let deliveryCost = 0;
     if (orderType === 'delivery') {
         if (deliveryRow) deliveryRow.style.display = 'flex';
@@ -623,7 +706,7 @@ function updateCheckoutSummary() {
     } else {
         if (deliveryRow) deliveryRow.style.display = 'none';
     }
-    
+
     if (totalEl) totalEl.textContent = `${finalSubtotal + deliveryCost}₪`;
 }
 
@@ -633,8 +716,8 @@ function openCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     const content = document.getElementById('checkoutModalContent');
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    
-    if(window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
         content.classList.remove('translate-y-full');
     } else {
         content.classList.remove('sm:translate-y-10');
@@ -646,8 +729,8 @@ function closeCheckoutModal() {
     const modal = document.getElementById('checkoutModal');
     const content = document.getElementById('checkoutModalContent');
     modal.classList.add('opacity-0', 'pointer-events-none');
-    
-    if(window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
         content.classList.add('translate-y-full');
     } else {
         content.classList.remove('sm:translate-y-0');
@@ -679,22 +762,22 @@ function handleCheckoutClick() {
         openCheckoutModal();
         return;
     }
-    
+
     const suggestions = getUpsellSuggestions();
     if (suggestions.length === 0) {
         hasShownUpsell = true;
         openCheckoutModal();
         return;
     }
-    
+
     currentUpsellSuggestionIds = suggestions.map(i => i.id);
     renderUpsellCarousel(suggestions);
-    
+
     // Reset state for this modal viewing
     isItemsAddedFromUpsell = false;
     hasShownUpsell = true; // Mark as shown so returning to cart allows checking out later
     updateUpsellCheckoutButton();
-    
+
     closeCartModal();
     setTimeout(() => {
         openUpsellModal();
@@ -713,8 +796,8 @@ function openUpsellModal() {
     const modal = document.getElementById('upsellModal');
     const content = document.getElementById('upsellModalContent');
     modal.classList.remove('opacity-0', 'pointer-events-none');
-    
-    if(window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
         content.classList.remove('translate-y-full');
     } else {
         content.classList.remove('sm:translate-y-10');
@@ -726,8 +809,8 @@ function closeUpsellModal() {
     const modal = document.getElementById('upsellModal');
     const content = document.getElementById('upsellModalContent');
     modal.classList.add('opacity-0', 'pointer-events-none');
-    
-    if(window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
         content.classList.add('translate-y-full');
     } else {
         content.classList.remove('sm:translate-y-0');
@@ -739,11 +822,11 @@ function getUpsellSuggestions() {
     let hasSushi = false;
     let hasDrinks = false;
     let hasSauces = false;
-    
+
     const sushiCategories = ["Классические роллы", "Запеченные роллы"];
     const drinksCategory = "Напитки";
     const saucesCategory = "Соусы";
-    
+
     // Check what's in the cart
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0) {
@@ -753,14 +836,14 @@ function getUpsellSuggestions() {
             if (itemCategory === saucesCategory) hasSauces = true;
         }
     }
-    
+
     // If cart is empty, return none
     if (Object.keys(cart).length === 0) return [];
-    
+
     // Gather available items by category
     const availableDrinks = menuData.find(c => c.category === drinksCategory)?.items || [];
     const availableSauces = menuData.find(c => c.category === saucesCategory)?.items || [];
-    
+
     let cheapRolls = [];
     menuData.filter(c => sushiCategories.includes(c.category)).forEach(cat => {
         cat.items.forEach(i => {
@@ -769,16 +852,16 @@ function getUpsellSuggestions() {
             }
         });
     });
-    
+
     let allOtherItems = [];
     menuData.forEach(cat => {
         cat.items.forEach(i => {
             allOtherItems.push(i);
         });
     });
-    
+
     let suggestions = [];
-    
+
     // Logical schema
     if (hasSushi && !hasDrinks && !hasSauces) {
         suggestions = [
@@ -796,7 +879,7 @@ function getUpsellSuggestions() {
             ...getRandomItems(cheapRolls, 3)
         ];
     }
-    
+
     // If somehow we don't have exactly 6 unique items, pad with any items (excluding ones already in the list)
     if (suggestions.length < 6) {
         const needed = 6 - suggestions.length;
@@ -804,7 +887,7 @@ function getUpsellSuggestions() {
         const paddingPool = allOtherItems.filter(i => !currentIds.has(i.id));
         suggestions = [...suggestions, ...getRandomItems(paddingPool, needed)];
     }
-    
+
     return suggestions.slice(0, 6);
 }
 
@@ -847,7 +930,7 @@ function renderUpsellControlsHTML(id) {
 
 function renderUpsellCarousel(items) {
     const container = document.getElementById('upsellCarouselContainer');
-    
+
     container.innerHTML = items.map(item => `
         <div class="upsell-card shrink-0 w-[140px] lg:w-full lg:max-w-[140px] bg-card p-3 rounded-2xl border border-white/5 shadow-lg flex flex-col items-center relative overflow-hidden group snap-center min-h-[160px]">
             ${item.image ? `
@@ -870,10 +953,10 @@ function renderUpsellCarousel(items) {
 
 function addUpsellItemToCart(id) {
     addToCart(id);
-    
+
     isItemsAddedFromUpsell = true;
     updateUpsellCheckoutButton();
-    
+
     const container = document.getElementById('upsell-controls-' + id);
     if (container) {
         container.innerHTML = renderUpsellControlsHTML(id);
@@ -882,12 +965,12 @@ function addUpsellItemToCart(id) {
 
 function removeUpsellItem(id) {
     removeFromCart(id);
-    
+
     const container = document.getElementById('upsell-controls-' + id);
     if (container) {
         container.innerHTML = renderUpsellControlsHTML(id);
     }
-    
+
     // Check if there are any upsell items left in the cart
     let stillHasItems = false;
     for (const sid of currentUpsellSuggestionIds) {
@@ -903,7 +986,7 @@ function removeUpsellItem(id) {
 function updateUpsellCheckoutButton() {
     const btn = document.getElementById('btnUpsellCheckout');
     const textSpan = document.getElementById('upsellBtnText');
-    
+
     if (isItemsAddedFromUpsell) {
         btn.classList.remove('bg-white/5', 'text-white/90', 'border-white/10');
         btn.classList.add('bg-[#25D366]', 'text-white', 'border-transparent', 'shadow-lg', 'shadow-[#25D366]/20');
@@ -924,12 +1007,12 @@ function setOrderType(type) {
     const btnPickup = document.getElementById('btnTypePickup');
     const fields = document.getElementById('deliveryFields');
     const addressInput = document.getElementById('custAddress');
-    
+
     if (type === 'delivery') {
         selector.style.transform = 'translateX(0)';
         btnDelivery.classList.replace('text-white/60', 'text-white');
         btnPickup.classList.replace('text-white', 'text-white/60');
-        
+
         fields.style.display = 'block';
         setTimeout(() => fields.style.opacity = '1', 10);
         addressInput.required = true;
@@ -937,7 +1020,7 @@ function setOrderType(type) {
         selector.style.transform = 'translateX(100%)';
         btnPickup.classList.replace('text-white/60', 'text-white');
         btnDelivery.classList.replace('text-white', 'text-white/60');
-        
+
         fields.style.opacity = '0';
         setTimeout(() => fields.style.display = 'none', 300);
         addressInput.required = false;
@@ -947,35 +1030,35 @@ function setOrderType(type) {
 
 function submitOrder() {
     const form = document.getElementById('checkoutForm');
-    if(!form.checkValidity()) {
+    if (!form.checkValidity()) {
         form.reportValidity();
         return;
     }
-    
+
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
-    
+
     let orderText = currentLang === 'en' ? "🍣 *New Mistorsush Order!* 🍣\n\n" : "🍣 *Новый заказ Mistorsush!* 🍣\n\n";
     orderText += `*${i18n[currentLang].nameField}:* ${name}\n`;
     orderText += `*${i18n[currentLang].phoneField}:* ${phone}\n`;
     orderText += `*${currentLang === 'en' ? 'Receiving' : 'Получение'}:* ${orderType === 'delivery' ? i18n[currentLang].delivery + ' 🚚' : i18n[currentLang].pickup + ' 🚶‍♂️'}\n\n`;
-    
+
     if (orderType === 'delivery') {
         const address = document.getElementById('custAddress').value.trim();
         const apt = document.getElementById('custApt').value.trim();
         const floor = document.getElementById('custFloor').value.trim();
         const entrance = document.getElementById('custEntrance').value.trim();
-        
+
         orderText += `${i18n[currentLang].whatsappAddress} ${address}`;
-        if(apt) orderText += `, ${i18n[currentLang].whatsappApt} ${apt}`;
-        if(floor) orderText += `, ${i18n[currentLang].whatsappFloor} ${floor}`;
-        if(entrance) orderText += `, ${i18n[currentLang].whatsappEnt} ${entrance}`;
+        if (apt) orderText += `, ${i18n[currentLang].whatsappApt} ${apt}`;
+        if (floor) orderText += `, ${i18n[currentLang].whatsappFloor} ${floor}`;
+        if (entrance) orderText += `, ${i18n[currentLang].whatsappEnt} ${entrance}`;
         orderText += `\n\n`;
     }
-    
+
     let totalPrice = 0;
     let totalRolls = 0;
-    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы").flatMap(c => c.items.map(i => i.id)));
+    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы" || c.category === "Необычные роллы").flatMap(c => c.items.map(i => i.id)));
 
     orderText += `${i18n[currentLang].whatsappOrderTitle}\n`;
     for (const [id, count] of Object.entries(cart)) {
@@ -989,7 +1072,7 @@ function submitOrder() {
             }
         }
     }
-    
+
     if (totalRolls > 0) {
         orderText += `— 🎁 ${i18n[currentLang].freeKitCartName} x${totalRolls} (0₪)\n`;
     }
@@ -998,9 +1081,9 @@ function submitOrder() {
     if (discount > 0) {
         orderText += `\n${i18n[currentLang].whatsappPromo} -${discount}₪\n`;
     }
-    
+
     const finalSubtotal = totalPrice - discount;
-    
+
     let deliveryCost = 0;
     if (orderType === 'delivery') {
         if (finalSubtotal < 250) {
@@ -1010,19 +1093,19 @@ function submitOrder() {
             orderText += `\n${i18n[currentLang].whatsappDelivery} 0₪ (${i18n[currentLang].free})\n`;
         }
     }
-    
+
     const finalPrice = finalSubtotal + deliveryCost;
-    
+
     let comment = document.getElementById('custComment').value.trim();
-    if(comment) {
+    if (comment) {
         orderText += `\n${i18n[currentLang].whatsappComment} ${comment}\n`;
     }
-    
+
     orderText += `\n${i18n[currentLang].whatsappTotal} ${finalPrice}₪`;
-    
+
     const businessPhone = "972559284670";
     const url = `https://wa.me/${businessPhone}?text=${encodeURIComponent(orderText)}`;
-    
+
     // Clear and close
     cart = {};
     hasShownUpsell = false;
