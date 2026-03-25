@@ -500,11 +500,11 @@ async function verifyPromoDay() {
 
     try {
         // Primary: timeapi.io
-        const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Jerusalem', { 
+        const response = await fetch('https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Jerusalem', {
             cache: "no-store",
-            signal: controller.signal 
+            signal: controller.signal
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             // timeapi.io returns dayOfWeek as a string (e.g., "Friday")
@@ -517,9 +517,9 @@ async function verifyPromoDay() {
         try {
             const backupController = new AbortController();
             const backupTimeout = setTimeout(() => backupController.abort(), 3000);
-            const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jerusalem', { 
+            const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jerusalem', {
                 cache: "no-store",
-                signal: backupController.signal 
+                signal: backupController.signal
             });
             clearTimeout(backupTimeout);
             if (response.ok) {
@@ -550,6 +550,17 @@ async function verifyPromoDay() {
 
 // Initial verification call
 verifyPromoDay();
+
+function calculateSubtotal() {
+    let subtotal = 0;
+    for (const [id, count] of Object.entries(cart)) {
+        if (count > 0) {
+            const item = getItem(id);
+            if (item) subtotal += (item.price * count);
+        }
+    }
+    return subtotal;
+}
 
 function calculateDiscount() {
     if (!promoChecked || !isPromoActive) return 0;
@@ -656,20 +667,9 @@ function updateCartWidget() {
     const headerCartCountEl = document.getElementById('headerCartCount');
     const widget = document.getElementById('cartWidget');
 
-    let totalItems = 0;
-    let totalPrice = 0;
-
-    for (const [id, count] of Object.entries(cart)) {
-        if (count > 0) {
-            const item = getItem(id);
-            if (item) {
-                totalItems += count;
-                totalPrice += (item.price * count);
-            }
-        }
-    }
-
-    totalPrice -= calculateDiscount();
+    const subtotal = calculateSubtotal();
+    let totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+    let totalPrice = subtotal - calculateDiscount();
 
     if (cartCountEl) cartCountEl.textContent = totalItems;
     if (cartTotalEl) cartTotalEl.textContent = `${totalPrice}₪`;
@@ -810,13 +810,7 @@ function renderCartModalItems() {
 let orderType = 'delivery';
 
 function updateCheckoutSummary() {
-    let subtotal = 0;
-    for (const [id, count] of Object.entries(cart)) {
-        if (count > 0) {
-            const item = getItem(id);
-            if (item) subtotal += (item.price * count);
-        }
-    }
+    let subtotal = calculateSubtotal();
 
     const subtotalEl = document.getElementById('checkoutSubtotal');
     const discountRow = document.getElementById('checkoutDiscountRow');
@@ -1193,9 +1187,10 @@ async function submitOrder() {
     btn.disabled = true;
     btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${currentLang === 'en' ? 'Processing...' : 'Обработка...'}`;
 
-    const deliveryCost = orderType === 'delivery' ? (calculateSubtotal() >= 250 ? 0 : 30) : 0;
-    const { discount } = calculateDiscount();
-    const finalPrice = calculateSubtotal() - discount + deliveryCost;
+    const subtotal = calculateSubtotal();
+    const deliveryCost = orderType === 'delivery' ? (subtotal >= 250 ? 0 : 30) : 0;
+    const discount = calculateDiscount();
+    const finalPrice = subtotal - discount + deliveryCost;
 
     const fullAddress = `${address}${apt ? ', кв.' + apt : ''}${floor ? ', эт.' + floor : ''}${entrance ? ', под.' + entrance : ''}`;
 
@@ -1279,8 +1274,8 @@ async function submitOrder() {
         window.location.href = whatsappUrl;
 
         // Final cleanup
-        cart = [];
-        updateCart();
+        cart = {};
+        updateCartWidget();
         closeCheckoutModal();
         closeCartModal();
 
