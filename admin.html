@@ -703,19 +703,24 @@
             if (error) {
                 alert("Ошибка: " + error.message);
             } else {
-                document.getElementById('status-msg').innerHTML = "✅ Название обновлено";
-                setTimeout(() => document.getElementById('status-msg').innerHTML = "✅ Данные актуальны", 2000);
+                const statusMsg = document.getElementById('status-msg');
+                if (statusMsg) {
+                    statusMsg.innerHTML = "✅ Название обновлено";
+                    setTimeout(() => statusMsg.innerHTML = "✅ Данные актуальны", 2000);
+                }
             }
         }
 
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('scrollTopBtn');
-            if (window.scrollY > 300) {
-                btn.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
-                btn.classList.add('opacity-100', 'translate-y-0');
-            } else {
-                btn.classList.remove('opacity-100', 'translate-y-0');
-                btn.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+            if (btn) {
+                if (window.scrollY > 300) {
+                    btn.classList.remove('opacity-0', 'translate-y-24', 'pointer-events-none');
+                    btn.classList.add('opacity-100', 'translate-y-0');
+                } else {
+                    btn.classList.remove('opacity-100', 'translate-y-0');
+                    btn.classList.add('opacity-0', 'translate-y-24', 'pointer-events-none');
+                }
             }
         });
 
@@ -725,6 +730,7 @@
 
         async function loadOrders() {
             const list = document.getElementById('orders-list');
+            if (!list) return;
             list.innerHTML = `<div class="p-8 text-center text-muted animate-pulse font-black uppercase tracking-widest">Загрузка заказов...</div>`;
 
             const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
@@ -746,7 +752,17 @@
         }
 
         function renderOrderCard(order) {
-            const date = new Date(order.created_at).toLocaleString('ru-RU');
+            const date = new Date(order.created_at || Date.now()).toLocaleString('ru-RU');
+            const itemsData = order.items_json || {};
+            
+            const customerName = order.customer_name || itemsData.customer_name || "Не указано";
+            const customerPhone = order.customer_phone || itemsData.customer_phone || "Нет номера";
+            const orderType = order.order_type || itemsData.order_type || "delivery";
+            const customerAddress = order.delivery_address || order.customer_address || itemsData.customer_address || (orderType === 'pickup' ? 'Самовывоз' : 'Не указан');
+            const orderItemsRaw = order.order_items || itemsData.order_items || "Нет данных";
+            const comment = order.comment || itemsData.comment || "";
+            const totalSum = order.total_sum || order.total_price || 0;
+
             return `
                 <div class="bg-card border border-white/5 p-6 rounded-2xl shadow-xl hover:border-white/10 transition-all flex flex-col gap-4 relative overflow-hidden group">
                     <div class="absolute -right-8 -top-8 w-24 h-24 bg-brand/5 blur-3xl rounded-full"></div>
@@ -769,23 +785,23 @@
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                    <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-white/5 relative z-10">
                         <div class="space-y-4">
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Клиент</span>
                                 <div class="flex flex-col">
-                                    <span class="text-sm font-bold text-white/90">${order.customer_name}</span>
-                                    <span class="text-sm font-black text-brand">${order.customer_phone}</span>
+                                    <span class="text-sm font-bold text-white/90">${customerName}</span>
+                                    <span class="text-sm font-black text-brand">${customerPhone}</span>
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Адрес / Тип</span>
-                                <span class="text-xs font-medium text-white/70">${order.order_type === 'delivery' ? '🚗 Доставка: ' + order.customer_address : '🏃 Самовывоз'}</span>
+                                <span class="text-xs font-medium text-white/70">${orderType === 'delivery' ? '🚗 Доставка: ' + customerAddress : '🏃 Самовывоз'}</span>
                             </div>
-                            ${order.comment ? `
+                            ${comment ? `
                             <div class="flex flex-col gap-1 mt-2">
                                 <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Комментарий</span>
-                                <span class="text-xs text-white/90 bg-white/5 p-2 rounded-lg italic">"${order.comment}"</span>
+                                <span class="text-xs text-white/90 bg-white/5 p-2 rounded-lg italic">"${comment}"</span>
                             </div>
                             ` : ''}
                         </div>
@@ -793,15 +809,15 @@
                         <div class="space-y-3">
                              <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Состав заказа</span>
                              <div class="text-[13px] font-medium text-white/80 space-y-2 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
-                                ${order.order_items ? order.order_items.split('\n').map(item => `<div class="flex justify-between border-b border-white/5 pb-1 last:border-0"><span>${item}</span></div>`).join('') : 'Нет данных'}
+                                 ${orderItemsRaw.split('\n').map(item => `<div class="flex justify-between border-b border-white/5 pb-1 last:border-0"><span>${item}</span></div>`).join('')}
                              </div>
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center pt-4 border-t border-white/5 mt-2">
+                    <div class="flex justify-between items-center pt-4 border-t border-white/5 mt-2 relative z-10">
                         <div class="flex flex-col">
                              <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Итого</span>
-                             <span class="text-lg font-black text-white">${order.total_price}₪</span>
+                             <span class="text-lg font-black text-white">${totalSum}₪</span>
                         </div>
                         <button onclick="deleteOrder('${order.id}')" class="px-4 py-2 bg-white/5 hover:bg-brand transition-all rounded-xl text-[10px] font-black uppercase tracking-widest text-muted group-hover:text-white">Удалить</button>
                     </div>

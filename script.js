@@ -12,7 +12,7 @@ const i18n = {
     ru: {
         subtitle: "Суши в Ашкелоне",
         workingHours: "Работаем по предварительным заказам",
-        openEveryday: "Open Everyday 12:00 - 00:00",
+        openEveryday: "Open Everyday 12:00 - 23:00",
         promoTitle: "Акция Пятницы!",
         promoDesc: "Все запеченные роллы",
         cartEmpty: "Ваша корзина пуста :(",
@@ -66,7 +66,8 @@ const i18n = {
         upsellCheckoutBtn: "Перейти в корзину",
         searchPlaceholder: "Поиск...",
         searchResults: "Результаты поиска",
-        noResults: "Ничего не найдено :("
+        noResults: "Ничего не найдено :(",
+        outOfStock: "Нет в наличии"
     },
     en: {
         subtitle: "Sushi in Ashkelon",
@@ -125,7 +126,8 @@ const i18n = {
         upsellCheckoutBtn: "Go to cart",
         searchPlaceholder: "Search...",
         searchResults: "Search Results",
-        noResults: "Nothing found :("
+        noResults: "Nothing found :(",
+        outOfStock: "Out of Stock"
     }
 };
 
@@ -162,10 +164,10 @@ function toggleLang() {
 
 async function init() {
     applyLanguage();
-    
+
     if (sb) {
         try {
-            const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
+            const { data, error } = await sb.from('products').select('*').order('id');
             if (!error && data && data.length > 0) {
                 transformSupabaseData(data);
             }
@@ -239,7 +241,8 @@ function transformSupabaseData(data) {
                     price: p.price,
                     ingredients: p.description || "",
                     ingredientsEn: trans.ingredientsEn || p.description || "",
-                    image: p.image_url
+                    image: p.image_url,
+                    is_available: p.is_available
                 };
             })
         };
@@ -372,17 +375,25 @@ function renderMenu() {
             else if (catName === "Соусы") { itemBg = 'bg-[#211616]'; itemBorder = 'border-[#3b2323]'; }
         }
 
+        const isAvailable = item.is_available !== false;
+        const opacityClass = isAvailable ? '' : 'opacity-60 grayscale-[0.7] contrast-[0.8]';
+
         return `
-                <div class="product-card flex flex-col justify-between ${itemBg} p-4 rounded-2xl border ${itemBorder} ${shadowClass}">
+                <div class="product-card flex flex-col justify-between ${itemBg} p-4 rounded-2xl border ${itemBorder} ${shadowClass} transition-all duration-300 ${opacityClass} relative">
+                    ${!isAvailable ? `<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none flex justify-center">
+                        <span class="bg-black/60 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-2xl">
+                            ${i18n[currentLang].outOfStock}
+                        </span>
+                    </div>` : ''}
                     ${item.image ? `<div class="w-full flex justify-center mb-3"><img src="${item.image}" alt="${item.name}" class="h-28 object-contain drop-shadow-md"></div>` : ''}
                     <div class="mb-3">
                         <h3 class="font-bold text-[17px] leading-snug mb-1.5 text-white/95">${currentLang === 'en' ? item.nameEn : item.name}</h3>
                         <p class="text-xs text-muted leading-relaxed line-clamp-3">${currentLang === 'en' ? item.ingredientsEn : item.ingredients}</p>
                     </div>
                     <div class="flex justify-between items-center pt-3 border-t border-white/5 mt-auto">
-                        <span class="font-bold text-lg text-brand">${item.price}₪</span>
+                        <span class="font-bold text-lg text-brand ${!isAvailable ? 'opacity-50' : ''}">${item.price}₪</span>
                         <div class="cart-controls" id="controls-${item.id}">
-                            ${renderControlsHTML(item.id)}
+                            ${isAvailable ? renderControlsHTML(item.id) : ''}
                         </div>
                     </div>
                 </div>
@@ -419,7 +430,7 @@ function renderDrawer() {
             <span class="text-2xl group-hover:scale-110 transition-transform duration-300">${icon}</span>
             <div class="flex flex-col">
                 <span class="font-bold text-[13px] tracking-wider uppercase">${currentLang === 'en' ? cat.categoryEn : cat.category}</span>
-                <span class="text-[10px] text-muted font-medium uppercase tracking-widest mt-0.5 opacity-60">${cat.items.length} ${currentLang === 'en' ? 'items' : 'позиций'}</span>
+                <span class="text-[10px] text-muted font-medium uppercase tracking-widest mt-0.5 opacity-60">${cat.items.filter(i => i.is_available !== false).length} ${currentLang === 'en' ? 'items' : 'позиций'}</span>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 ml-auto ${isActive ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 group-hover:translate-x-1 transition-all"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
         </button>
@@ -520,7 +531,7 @@ function calculateDiscount() {
     const bakedCat = menuData.find(c => c.category === "Запеченные роллы");
     if (!bakedCat) return 0;
 
-    const bakedIds = new Set(bakedCat.items.map(i => i.id));
+    const bakedIds = new Set(bakedCat.items.filter(i => i.is_available !== false).map(i => i.id));
 
     let bakedPrices = [];
     for (const [id, count] of Object.entries(cart)) {
@@ -547,6 +558,9 @@ function calculateDiscount() {
 }
 
 function addToCart(id) {
+    const item = getItem(id);
+    if (item && item.is_available === false) return; // Prevent adding if unavailable
+
     if (!cart[id]) cart[id] = 0;
     cart[id]++;
     updateCartWidget();
@@ -1140,59 +1154,26 @@ async function submitOrder() {
         return;
     }
 
-    const submitBtn = document.querySelector('button[onclick="submitOrder()"]');
-    const originalBtnContent = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="animate-spin">⌛</span> ' + (currentLang === 'en' ? 'Processing...' : 'Обработка...');
-
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+    const apt = document.getElementById('custApt').value.trim();
+    const floor = document.getElementById('custFloor').value.trim();
+    const entrance = document.getElementById('custEntrance').value.trim();
     const comment = document.getElementById('custComment').value.trim();
-    
-    let orderItemsText = "";
-    let totalPrice = 0;
-    let totalRolls = 0;
-    const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы" || c.category === "Необычные роллы").flatMap(c => c.items.map(i => i.id)));
 
-    for (const [id, count] of Object.entries(cart)) {
-        if (count > 0) {
-            const item = getItem(id);
-            if (item) {
-                const itemName = currentLang === 'en' ? (item.nameEn || item.name) : item.name;
-                orderItemsText += `${itemName} x${count} (${item.price * count}₪)\n`;
-                totalPrice += (item.price * count);
-                if (rollCategories.has(id)) totalRolls += count;
-            }
-        }
-    }
+    const btn = document.querySelector('button[onclick="submitOrder()"]');
+    const originalBtnContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${currentLang === 'en' ? 'Processing...' : 'Обработка...'}`;
 
-    if (totalRolls > 0) {
-        orderItemsText += `🎁 ${i18n[currentLang].freeKitCartName} x${totalRolls} (0₪)\n`;
-    }
+    const deliveryCost = orderType === 'delivery' ? (calculateSubtotal() >= 250 ? 0 : 30) : 0;
+    const { discount } = calculateDiscount();
+    const finalPrice = calculateSubtotal() - discount + deliveryCost;
 
-    const discount = calculateDiscount();
-    const finalSubtotal = totalPrice - discount;
+    const fullAddress = `${address}${apt ? ', кв.' + apt : ''}${floor ? ', эт.' + floor : ''}${entrance ? ', под.' + entrance : ''}`;
 
-    let deliveryCost = 0;
-    let fullAddress = "";
-    if (orderType === 'delivery') {
-        const address = document.getElementById('custAddress').value.trim();
-        const apt = document.getElementById('custApt').value.trim();
-        const floor = document.getElementById('custFloor').value.trim();
-        const entrance = document.getElementById('custEntrance').value.trim();
-        
-        fullAddress = address;
-        if (apt) fullAddress += `, Кв. ${apt}`;
-        if (floor) fullAddress += `, Этаж ${floor}`;
-        if (entrance) fullAddress += `, Подъезд ${entrance}`;
-
-        if (finalSubtotal < 250) {
-            deliveryCost = 30;
-        }
-    }
-
-    const finalPrice = finalSubtotal + deliveryCost;
-
+    let orderItemsText = cart.map(item => `${item.name} x${item.quantity} (${item.price * item.quantity}₪)`).join('\n');
     let orderDetailsForDb = orderItemsText.trim();
     if (discount > 0) {
         orderDetailsForDb += `\nСкидка: -${discount}₪`;
@@ -1201,64 +1182,84 @@ async function submitOrder() {
         orderDetailsForDb += `\nДоставка: +${deliveryCost}₪`;
     }
 
-    // 1. Save to Supabase
-    if (sb) {
-        try {
+    try {
+        console.log("Начинаю отправку заказа в Supabase...");
+        
+        if (sb) {
             const { error } = await sb.from('orders').insert([{
-                customer_name: name,
-                customer_phone: phone,
-                order_type: orderType,
-                customer_address: orderType === 'delivery' ? fullAddress : 'Самовывоз',
-                order_items: orderDetailsForDb + (comment ? `\n\nКомментарий: ${comment}` : ''),
-                total_price: finalPrice,
-                status: 'Готовится'
+                status: 'Готовится',
+                total_sum: finalPrice,
+                delivery_address: orderType === 'delivery' ? fullAddress : 'Самовывоз',
+                items_json: {
+                    customer_name: name,
+                    customer_phone: phone,
+                    order_type: orderType,
+                    order_items: orderDetailsForDb,
+                    comment: comment,
+                    cart: cart
+                }
             }]);
-            if (error) console.error("Supabase order save error:", error);
-        } catch (e) {
-            console.error("Failed to save order to Supabase:", e);
+
+            if (error) {
+                alert("Ошибка Supabase: " + error.message);
+                console.error("Supabase Error:", error);
+                btn.disabled = false;
+                btn.innerHTML = originalBtnContent;
+                return;
+            }
         }
+
+        console.log("Заказ успешно сохранен!");
+        alert(currentLang === 'en' ? "Order successfully saved! Opening WhatsApp..." : "Заказ успешно сохранен! Переходим в WhatsApp...");
+
+        // 2. Prepare WhatsApp message
+        let whatsappText = currentLang === 'en' ? "🍣 *New Mistorsush Order!* 🍣\n\n" : "🍣 *Новый заказ Mistorsush!* 🍣\n\n";
+        whatsappText += `*${i18n[currentLang].nameField}:* ${name}\n`;
+        whatsappText += `*${i18n[currentLang].phoneField}:* ${phone}\n`;
+        whatsappText += `*${currentLang === 'en' ? 'Receiving' : 'Получение'}:* ${orderType === 'delivery' ? i18n[currentLang].delivery + ' 🚚' : i18n[currentLang].pickup + ' 🚶‍♂️'}\n\n`;
+
+        if (orderType === 'delivery') {
+            whatsappText += `${i18n[currentLang].whatsappAddress} ${fullAddress}\n\n`;
+        }
+
+        whatsappText += `${i18n[currentLang].whatsappOrderTitle}\n${orderItemsText}`;
+
+        if (discount > 0) {
+            whatsappText += `\n\n*${i18n[currentLang].discount2plus1}:* -${discount}₪`;
+        }
+
+        if (deliveryCost > 0) {
+            whatsappText += `\n*${i18n[currentLang].deliveryFee}:* ${deliveryCost}₪`;
+        } else if (orderType === 'delivery') {
+            whatsappText += `\n*${i18n[currentLang].deliveryFee}:* ${currentLang === 'en' ? 'FREE' : 'БЕСПЛАТНО'}`;
+        }
+
+        whatsappText += `\n\n*${i18n[currentLang].totalToPay}: ${finalPrice}₪*`;
+
+        if (comment) {
+            whatsappText += `\n\n*${i18n[currentLang].commentField}:* ${comment}`;
+        }
+
+        const whatsappUrl = `https://wa.me/972559284670?text=${encodeURIComponent(whatsappText)}`;
+
+        // Finalize UI and Redirect
+        window.location.href = whatsappUrl;
+        
+        // Final cleanup
+        cart = [];
+        updateCart();
+        closeCheckoutModal();
+        closeCartModal();
+        
+        btn.disabled = false;
+        btn.innerHTML = originalBtnContent;
+
+    } catch (err) {
+        alert("Критическая ошибка кода: " + err.message);
+        console.error("Critical Error:", err);
+        btn.disabled = false;
+        btn.innerHTML = originalBtnContent;
     }
-
-    // 2. Prepare WhatsApp message
-    let whatsappText = currentLang === 'en' ? "🍣 *New Mistorsush Order!* 🍣\n\n" : "🍣 *Новый заказ Mistorsush!* 🍣\n\n";
-    whatsappText += `*${i18n[currentLang].nameField}:* ${name}\n`;
-    whatsappText += `*${i18n[currentLang].phoneField}:* ${phone}\n`;
-    whatsappText += `*${currentLang === 'en' ? 'Receiving' : 'Получение'}:* ${orderType === 'delivery' ? i18n[currentLang].delivery + ' 🚚' : i18n[currentLang].pickup + ' 🚶‍♂️'}\n\n`;
-
-    if (orderType === 'delivery') {
-        whatsappText += `${i18n[currentLang].whatsappAddress} ${fullAddress}\n\n`;
-    }
-
-    whatsappText += `${i18n[currentLang].whatsappOrderTitle}\n${orderItemsText}`;
-
-    if (discount > 0) {
-        whatsappText += `\n${i18n[currentLang].whatsappPromo} -${discount}₪\n`;
-    }
-
-    if (orderType === 'delivery') {
-        whatsappText += `\n${i18n[currentLang].whatsappDelivery} ${deliveryCost}₪${deliveryCost === 0 ? ' (' + i18n[currentLang].free + ')' : ''}\n`;
-    }
-
-    if (comment) {
-        whatsappText += `\n${i18n[currentLang].whatsappComment} ${comment}\n`;
-    }
-
-    whatsappText += `\n${i18n[currentLang].whatsappTotal} ${finalPrice}₪`;
-
-    const businessPhone = "972559284670";
-    const url = `https://wa.me/${businessPhone}?text=${encodeURIComponent(whatsappText)}`;
-
-    // Clear and close
-    cart = {};
-    hasShownUpsell = false;
-    updateCartWidget();
-    closeCheckoutModal();
-    
-    // Restore button (just in case)
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnContent;
-
-    window.location.href = url;
 }
 
 document.addEventListener('DOMContentLoaded', init);
