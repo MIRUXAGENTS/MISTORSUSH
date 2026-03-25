@@ -4,6 +4,10 @@ let currentCategoryView = 0;
 let isSearchActive = false;
 let searchQuery = '';
 
+const S_URL = 'https://iaqbtwsothmkdjapstkq.supabase.co';
+const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhcWJ0d3NvdGhta2RqYXBzdGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNjE0ODYsImV4cCI6MjA4OTgzNzQ4Nn0.ye0QGkypstTfxGjCkytn_x7bwsa-2tNiq3EIEulsvV0';
+const sb = typeof supabase !== 'undefined' ? supabase.createClient(S_URL, S_KEY) : null;
+
 const i18n = {
     ru: {
         subtitle: "Суши в Ашкелоне",
@@ -156,12 +160,95 @@ function toggleLang() {
     if (!document.getElementById('checkoutModal').classList.contains('opacity-0')) updateCheckoutSummary();
 }
 
-function init() {
+async function init() {
     applyLanguage();
+    
+    if (sb) {
+        try {
+            const { data, error } = await sb.from('products').select('*').eq('is_available', true).order('id');
+            if (!error && data && data.length > 0) {
+                transformSupabaseData(data);
+            }
+        } catch (e) {
+            console.error("Supabase fetch error:", e);
+        }
+    }
+
     renderNav();
     renderDrawer();
     selectCategory(0);
     updateCartWidget();
+}
+
+function transformSupabaseData(data) {
+    // Build translation map from original menuData (from data.js) before it's cleared
+    const translationMap = {};
+    if (typeof menuData !== 'undefined' && Array.isArray(menuData)) {
+        menuData.forEach(cat => {
+            if (cat.items) {
+                cat.items.forEach(item => {
+                    translationMap[item.name] = {
+                        nameEn: item.nameEn,
+                        ingredientsEn: item.ingredientsEn
+                    };
+                });
+            }
+        });
+    }
+
+    const categoryOrder = [
+        'classic_rolls',
+        'baked_rolls',
+        'unusual_rolls',
+        'burgers',
+        'gunkan',
+        'drinks',
+        'sauces'
+    ];
+
+    const categoryNamesRu = {
+        'classic_rolls': 'Классические роллы',
+        'baked_rolls': 'Запеченные роллы',
+        'unusual_rolls': 'Необычные роллы',
+        'burgers': 'Рисовые гамбургеры',
+        'gunkan': 'Гункан и суши',
+        'drinks': 'Напитки',
+        'sauces': 'Соусы'
+    };
+
+    const categoryNamesEn = {
+        'classic_rolls': 'Classic Rolls',
+        'baked_rolls': 'Baked Rolls',
+        'unusual_rolls': 'Unusual Rolls',
+        'burgers': 'Rice Burgers',
+        'gunkan': 'Gunkan and Sushi',
+        'drinks': 'Drinks',
+        'sauces': 'Sauces'
+    };
+
+    const newMenuData = categoryOrder.map(catSlug => {
+        return {
+            category: categoryNamesRu[catSlug] || catSlug,
+            categoryEn: categoryNamesEn[catSlug] || catSlug,
+            items: data.filter(p => p.category === catSlug).map(p => {
+                const trans = translationMap[p.name] || {};
+                return {
+                    id: p.id.toString(),
+                    name: p.name,
+                    nameEn: trans.nameEn || p.name,
+                    price: p.price,
+                    ingredients: p.description || "",
+                    ingredientsEn: trans.ingredientsEn || p.description || "",
+                    image: p.image_url
+                };
+            })
+        };
+    }).filter(cat => cat.items.length > 0);
+
+    // Update global menuData
+    if (newMenuData.length > 0) {
+        menuData.splice(0, menuData.length, ...newMenuData);
+    }
 }
 
 function getCategoryOfItem(id) {
@@ -457,6 +544,24 @@ function calculateDiscount() {
         discount += bakedPrices[i];
     }
     return discount;
+}
+
+function addToCart(id) {
+    if (!cart[id]) cart[id] = 0;
+    cart[id]++;
+    updateCartWidget();
+    renderControls(id);
+    if (!document.getElementById('cartModal').classList.contains('opacity-0')) renderCartModalItems();
+}
+
+function removeFromCart(id) {
+    if (cart[id] && cart[id] > 0) {
+        cart[id]--;
+        if (cart[id] === 0) delete cart[id];
+        updateCartWidget();
+        renderControls(id);
+        if (!document.getElementById('cartModal').classList.contains('opacity-0')) renderCartModalItems();
+    }
 }
 
 function renderControlsHTML(id) {
@@ -1028,45 +1133,33 @@ function setOrderType(type) {
     updateCheckoutSummary();
 }
 
-function submitOrder() {
+async function submitOrder() {
     const form = document.getElementById('checkoutForm');
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
     }
 
+    const submitBtn = document.querySelector('button[onclick="submitOrder()"]');
+    const originalBtnContent = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="animate-spin">⌛</span> ' + (currentLang === 'en' ? 'Processing...' : 'Обработка...');
+
     const name = document.getElementById('custName').value.trim();
     const phone = document.getElementById('custPhone').value.trim();
-
-    let orderText = currentLang === 'en' ? "🍣 *New Mistorsush Order!* 🍣\n\n" : "🍣 *Новый заказ Mistorsush!* 🍣\n\n";
-    orderText += `*${i18n[currentLang].nameField}:* ${name}\n`;
-    orderText += `*${i18n[currentLang].phoneField}:* ${phone}\n`;
-    orderText += `*${currentLang === 'en' ? 'Receiving' : 'Получение'}:* ${orderType === 'delivery' ? i18n[currentLang].delivery + ' 🚚' : i18n[currentLang].pickup + ' 🚶‍♂️'}\n\n`;
-
-    if (orderType === 'delivery') {
-        const address = document.getElementById('custAddress').value.trim();
-        const apt = document.getElementById('custApt').value.trim();
-        const floor = document.getElementById('custFloor').value.trim();
-        const entrance = document.getElementById('custEntrance').value.trim();
-
-        orderText += `${i18n[currentLang].whatsappAddress} ${address}`;
-        if (apt) orderText += `, ${i18n[currentLang].whatsappApt} ${apt}`;
-        if (floor) orderText += `, ${i18n[currentLang].whatsappFloor} ${floor}`;
-        if (entrance) orderText += `, ${i18n[currentLang].whatsappEnt} ${entrance}`;
-        orderText += `\n\n`;
-    }
-
+    const comment = document.getElementById('custComment').value.trim();
+    
+    let orderItemsText = "";
     let totalPrice = 0;
     let totalRolls = 0;
     const rollCategories = new Set(menuData.filter(c => c.category === "Классические роллы" || c.category === "Запеченные роллы" || c.category === "Необычные роллы").flatMap(c => c.items.map(i => i.id)));
 
-    orderText += `${i18n[currentLang].whatsappOrderTitle}\n`;
     for (const [id, count] of Object.entries(cart)) {
         if (count > 0) {
             const item = getItem(id);
             if (item) {
-                const itemName = currentLang === 'en' ? item.nameEn : item.name;
-                orderText += `— ${itemName} x${count} (${item.price * count}₪) \n`;
+                const itemName = currentLang === 'en' ? (item.nameEn || item.name) : item.name;
+                orderItemsText += `${itemName} x${count} (${item.price * count}₪)\n`;
                 totalPrice += (item.price * count);
                 if (rollCategories.has(id)) totalRolls += count;
             }
@@ -1074,43 +1167,97 @@ function submitOrder() {
     }
 
     if (totalRolls > 0) {
-        orderText += `— 🎁 ${i18n[currentLang].freeKitCartName} x${totalRolls} (0₪)\n`;
+        orderItemsText += `🎁 ${i18n[currentLang].freeKitCartName} x${totalRolls} (0₪)\n`;
     }
 
     const discount = calculateDiscount();
-    if (discount > 0) {
-        orderText += `\n${i18n[currentLang].whatsappPromo} -${discount}₪\n`;
-    }
-
     const finalSubtotal = totalPrice - discount;
 
     let deliveryCost = 0;
+    let fullAddress = "";
     if (orderType === 'delivery') {
+        const address = document.getElementById('custAddress').value.trim();
+        const apt = document.getElementById('custApt').value.trim();
+        const floor = document.getElementById('custFloor').value.trim();
+        const entrance = document.getElementById('custEntrance').value.trim();
+        
+        fullAddress = address;
+        if (apt) fullAddress += `, Кв. ${apt}`;
+        if (floor) fullAddress += `, Этаж ${floor}`;
+        if (entrance) fullAddress += `, Подъезд ${entrance}`;
+
         if (finalSubtotal < 250) {
             deliveryCost = 30;
-            orderText += `\n${i18n[currentLang].whatsappDelivery} 30₪\n`;
-        } else {
-            orderText += `\n${i18n[currentLang].whatsappDelivery} 0₪ (${i18n[currentLang].free})\n`;
         }
     }
 
     const finalPrice = finalSubtotal + deliveryCost;
 
-    let comment = document.getElementById('custComment').value.trim();
-    if (comment) {
-        orderText += `\n${i18n[currentLang].whatsappComment} ${comment}\n`;
+    let orderDetailsForDb = orderItemsText.trim();
+    if (discount > 0) {
+        orderDetailsForDb += `\nСкидка: -${discount}₪`;
+    }
+    if (deliveryCost > 0) {
+        orderDetailsForDb += `\nДоставка: +${deliveryCost}₪`;
     }
 
-    orderText += `\n${i18n[currentLang].whatsappTotal} ${finalPrice}₪`;
+    // 1. Save to Supabase
+    if (sb) {
+        try {
+            const { error } = await sb.from('orders').insert([{
+                customer_name: name,
+                customer_phone: phone,
+                order_type: orderType,
+                customer_address: orderType === 'delivery' ? fullAddress : 'Самовывоз',
+                order_items: orderDetailsForDb + (comment ? `\n\nКомментарий: ${comment}` : ''),
+                total_price: finalPrice,
+                status: 'Готовится'
+            }]);
+            if (error) console.error("Supabase order save error:", error);
+        } catch (e) {
+            console.error("Failed to save order to Supabase:", e);
+        }
+    }
+
+    // 2. Prepare WhatsApp message
+    let whatsappText = currentLang === 'en' ? "🍣 *New Mistorsush Order!* 🍣\n\n" : "🍣 *Новый заказ Mistorsush!* 🍣\n\n";
+    whatsappText += `*${i18n[currentLang].nameField}:* ${name}\n`;
+    whatsappText += `*${i18n[currentLang].phoneField}:* ${phone}\n`;
+    whatsappText += `*${currentLang === 'en' ? 'Receiving' : 'Получение'}:* ${orderType === 'delivery' ? i18n[currentLang].delivery + ' 🚚' : i18n[currentLang].pickup + ' 🚶‍♂️'}\n\n`;
+
+    if (orderType === 'delivery') {
+        whatsappText += `${i18n[currentLang].whatsappAddress} ${fullAddress}\n\n`;
+    }
+
+    whatsappText += `${i18n[currentLang].whatsappOrderTitle}\n${orderItemsText}`;
+
+    if (discount > 0) {
+        whatsappText += `\n${i18n[currentLang].whatsappPromo} -${discount}₪\n`;
+    }
+
+    if (orderType === 'delivery') {
+        whatsappText += `\n${i18n[currentLang].whatsappDelivery} ${deliveryCost}₪${deliveryCost === 0 ? ' (' + i18n[currentLang].free + ')' : ''}\n`;
+    }
+
+    if (comment) {
+        whatsappText += `\n${i18n[currentLang].whatsappComment} ${comment}\n`;
+    }
+
+    whatsappText += `\n${i18n[currentLang].whatsappTotal} ${finalPrice}₪`;
 
     const businessPhone = "972559284670";
-    const url = `https://wa.me/${businessPhone}?text=${encodeURIComponent(orderText)}`;
+    const url = `https://wa.me/${businessPhone}?text=${encodeURIComponent(whatsappText)}`;
 
     // Clear and close
     cart = {};
     hasShownUpsell = false;
     updateCartWidget();
     closeCheckoutModal();
+    
+    // Restore button (just in case)
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnContent;
+
     window.location.href = url;
 }
 

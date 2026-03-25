@@ -98,7 +98,7 @@
     </div>
 
     <div id="main-content" class="max-w-4xl mx-auto pb-20 hidden">
-        <header class="mb-4 flex flex-col items-center sticky top-0 z-40 bg-dark/80 backdrop-blur-xl py-4 -mx-4 px-4 border-b border-white/5">
+        <header class="mb-4 flex flex-col items-center bg-dark/80 backdrop-blur-xl py-4 -mx-4 px-4 border-b border-white/5">
             <div class="flex items-center gap-4 w-full justify-between">
                 <button onclick="openDrawer()"
                     class="p-2 -ml-2 text-white/70 hover:text-brand transition-all hover:scale-110 active:scale-90 relative">
@@ -161,7 +161,7 @@
         <div id="products-view" class="hidden space-y-8 animate-fade-in">
             <!-- Category Nav Inside Products View -->
             <nav id="category-nav"
-                class="sticky top-[80px] z-30 bg-dark/80 backdrop-blur-md border-b border-white/5 -mx-4 px-4 py-4 mb-4 flex flex-wrap gap-2 items-center justify-center">
+                class="bg-dark/80 backdrop-blur-md border-b border-white/5 -mx-4 px-4 py-4 mb-4 flex flex-wrap gap-2 items-center justify-center">
                 <!-- Populated via JS -->
             </nav>
             <!-- Toggle Button -->
@@ -454,8 +454,8 @@
                      data-name="${p.name.toLowerCase()}">
                     <div class="absolute -right-10 -bottom-10 w-24 h-24 bg-white/5 blur-3xl rounded-full"></div>
                     
-                    <div class="flex justify-between items-start gap-4 relative z-10">
-                        <div class="flex-grow">
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4 relative z-10">
+                        <div class="flex-grow w-full">
                             <div class="relative group/name-input">
                                 <input type="text" value="${p.name}" id="name-${p.id}" 
                                        onchange="updateName(${p.id})"
@@ -482,10 +482,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-white/5">
                             <div class="bg-dark/40 border border-white/10 px-3 py-1.5 rounded-xl flex items-center gap-3 hover:border-brand/30 transition-colors">
                                 <input type="number" step="1" value="${p.price}" 
-                                       id="price-${p.id}" class="bg-transparent text-white font-bold w-14 text-center outline-none text-lg">
+                                       id="price-${p.id}" class="bg-transparent text-white font-bold w-12 text-center outline-none text-base">
                                 <span class="text-muted font-black text-xs">₪</span>
                                 <button onclick="updatePrice(${p.id})" class="bg-brand hover:brightness-110 text-white p-2 rounded-lg transition-all active:scale-90 shadow-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -494,7 +494,7 @@
                                 </button>
                             </div>
                             <button onclick="toggle(${p.id}, ${p.is_available})" 
-                                    class="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center transition-all active:scale-90 ${p.is_available ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20' : 'bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/20 hover:bg-[#25D366]/20'}">
+                                    class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${p.is_available ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20' : 'bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/20 hover:bg-[#25D366]/20'}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" />
                                 </svg>
@@ -725,6 +725,8 @@
 
         async function loadOrders() {
             const list = document.getElementById('orders-list');
+            list.innerHTML = `<div class="p-8 text-center text-muted animate-pulse font-black uppercase tracking-widest">Загрузка заказов...</div>`;
+
             const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
 
             if (error) {
@@ -732,12 +734,15 @@
                 return;
             }
 
-            if (data.length === 0) {
-                list.innerHTML = `<div class="p-12 text-center text-muted uppercase tracking-widest font-bold border border-white/5 rounded-2xl">Заказов пока нет</div>`;
+            // Фильтруем завершенные заказы
+            const activeOrders = data.filter(order => order.status !== 'Завершен');
+
+            if (activeOrders.length === 0) {
+                list.innerHTML = `<div class="p-12 text-center text-muted uppercase tracking-widest font-bold border border-white/5 rounded-2xl">Активных заказов нет</div>`;
                 return;
             }
 
-            list.innerHTML = data.map(order => renderOrderCard(order)).join('');
+            list.innerHTML = activeOrders.map(order => renderOrderCard(order)).join('');
         }
 
         function renderOrderCard(order) {
@@ -751,7 +756,17 @@
                             <span class="text-[10px] font-black text-brand uppercase tracking-widest">Заказ #${order.id}</span>
                             <span class="text-xs font-bold text-muted">${date}</span>
                         </div>
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase text-muted tracking-widest group-hover:bg-brand/10 group-hover:text-brand transition-colors">Новый</span>
+                        <div class="flex items-center gap-2">
+                             <select onchange="updateStatus('${order.id}', this.value)" 
+                                    class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer outline-none border-none transition-all
+                                    ${order.status === 'Готовится' ? 'bg-orange-500/10 text-orange-500' : 
+                                      order.status === 'Курьер в пути' ? 'bg-blue-500/10 text-blue-500' : 
+                                      'bg-white/5 text-muted'}">
+                                <option value="Готовится" ${order.status === 'Готовится' ? 'selected' : ''}>Готовится</option>
+                                <option value="Курьер в пути" ${order.status === 'Курьер в пути' ? 'selected' : ''}>В пути</option>
+                                <option value="Завершен" ${order.status === 'Завершен' ? 'selected' : ''}>Завершен</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
@@ -767,6 +782,12 @@
                                 <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Адрес / Тип</span>
                                 <span class="text-xs font-medium text-white/70">${order.order_type === 'delivery' ? '🚗 Доставка: ' + order.customer_address : '🏃 Самовывоз'}</span>
                             </div>
+                            ${order.comment ? `
+                            <div class="flex flex-col gap-1 mt-2">
+                                <span class="text-[9px] uppercase font-black tracking-widest text-muted/50">Комментарий</span>
+                                <span class="text-xs text-white/90 bg-white/5 p-2 rounded-lg italic">"${order.comment}"</span>
+                            </div>
+                            ` : ''}
                         </div>
 
                         <div class="space-y-3">
@@ -786,6 +807,15 @@
                     </div>
                 </div>
             `;
+        }
+
+        async function updateStatus(id, newStatus) {
+            const { error } = await sb.from('orders').update({ status: newStatus }).eq('id', id);
+            if (error) {
+                alert('Ошибка при обновлении статуса');
+            } else {
+                loadOrders();
+            }
         }
 
         async function deleteOrder(id) {
