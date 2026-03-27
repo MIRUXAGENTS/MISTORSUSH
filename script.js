@@ -1447,6 +1447,28 @@ function closeSettingsModal() {
     if (document.getElementById('confirmNewPassword')) document.getElementById('confirmNewPassword').value = '';
 }
 
+function openOrderDetailsModal(order) {
+    const modal = document.getElementById('orderDetailsModal');
+    const content = document.getElementById('orderDetailsModalContent');
+    modal.classList.remove('pointer-events-none', 'opacity-0');
+    content.classList.remove('translate-y-full', 'sm:translate-y-10');
+    content.classList.add('translate-y-0');
+    
+    const date = new Date(order.created_at).toLocaleString(currentLang === 'en' ? 'en-US' : 'ru-RU');
+    document.getElementById('orderDetailsDate').textContent = date;
+    document.getElementById('orderDetailsTitle').textContent = (currentLang === 'en' ? 'Order #' : 'Заказ №') + order.id;
+    document.getElementById('orderDetailsContent').innerText = order.items_json.order_items || "";
+    document.getElementById('orderDetailsTotal').textContent = order.total_sum + '₪';
+}
+
+function closeOrderDetailsModal() {
+    const modal = document.getElementById('orderDetailsModal');
+    const content = document.getElementById('orderDetailsModalContent');
+    modal.classList.add('pointer-events-none', 'opacity-0');
+    content.classList.add('translate-y-full', 'sm:translate-y-10');
+    content.classList.remove('translate-y-0');
+}
+
 async function loadProfileData() {
     if (!currentUser || !sb) return;
     
@@ -1603,19 +1625,51 @@ async function loadUserOrders() {
             return;
         }
         
-        container.innerHTML = data.map(order => {
+        container.innerHTML = data.map((order, idx) => {
+            const orderJson = JSON.stringify(order).replace(/'/g, "&apos;");
             const date = new Date(order.created_at).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ru-RU');
-            const statusColor = order.status === 'new' ? 'text-brand' : 'text-emerald-500';
-            const statusText = order.status === 'new' ? (currentLang === 'en' ? 'New' : 'Новый') : (currentLang === 'en' ? 'Completed' : 'Завершен');
+            
+            // Status Mapping
+            let statusText = '';
+            let statusColor = '';
+            
+            switch(order.status) {
+                case 'new':
+                    statusText = currentLang === 'en' ? 'New' : '🆕 Новый';
+                    statusColor = 'text-brand border-brand/20 bg-brand/5';
+                    break;
+                case 'Готовится':
+                    statusText = currentLang === 'en' ? 'Cooking' : '🔥 Готовится';
+                    statusColor = 'text-amber-500 border-amber-500/20 bg-amber-500/5';
+                    break;
+                case 'Курьер в пути':
+                    statusText = currentLang === 'en' ? 'In Transit' : '🛵 В пути';
+                    statusColor = 'text-blue-500 border-blue-500/20 bg-blue-500/5';
+                    break;
+                case 'Завершен':
+                    statusText = currentLang === 'en' ? 'Completed' : '✅ Завершен';
+                    statusColor = 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5';
+                    break;
+                default:
+                    statusText = order.status;
+                    statusColor = 'text-muted border-white/10 bg-white/5';
+            }
             
             return `
-                <div class="bg-card/50 border border-white/5 rounded-2xl p-4 space-y-2 group hover:border-brand/20 transition-all">
+                <div class="bg-card/50 border border-white/5 rounded-2xl p-4 space-y-2 group hover:border-brand/20 transition-all cursor-pointer active:scale-[0.98]" 
+                     onclick='openOrderDetailsModal(${orderJson})'>
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-black uppercase text-muted tracking-widest">${date}</span>
-                        <span class="text-[10px] font-black uppercase tracking-widest ${statusColor} bg-white/5 px-2 py-0.5 rounded-full">${statusText}</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest ${statusColor} border px-2 py-0.5 rounded-full shadow-sm">${statusText}</span>
                     </div>
                     <div class="text-[12px] font-bold text-white/80 line-clamp-1">${order.total_sum}₪ • ${order.order_type}</div>
-                    <div class="text-[9px] text-muted font-medium line-clamp-2 italic opacity-60">${order.items_json.order_items.split('\n')[0]}...</div>
+                    <div class="text-[9px] text-muted font-medium line-clamp-2 italic opacity-60">${(order.items_json.order_items || '').split('\n')[0]}...</div>
+                    <div class="text-[8px] text-brand/50 font-black uppercase tracking-widest pt-1 flex items-center gap-1 group-hover:text-brand transition-colors">
+                        ${currentLang === 'en' ? 'View details' : 'Подробнее'}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-2 h-2">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </div>
                 </div>
             `;
         }).join('');
