@@ -1167,26 +1167,47 @@ function setOrderType(type) {
     updateCheckoutSummary();
 }
 
+function sanitizeString(str) {
+    if (!str) return '';
+    return str.replace(/[<>\/\\]/g, '').trim();
+}
+
 async function submitOrder() {
+    // 0. Anti-Spam Check
+    const honeypot = document.getElementById('custWebsite').value;
+    if (honeypot) {
+        console.warn("Spam detected via honeypot");
+        return;
+    }
+
+    const lastOrderTime = localStorage.getItem('lastOrderTime');
+    if (lastOrderTime) {
+        const diff = Date.now() - parseInt(lastOrderTime);
+        if (diff < 3 * 60 * 1000) { // 3 minutes
+            alert(currentLang === 'en' ? "Please wait a few minutes before placing another order." : "Пожалуйста, подождите несколько минут перед повторным заказом.");
+            return;
+        }
+    }
+
     const form = document.getElementById('checkoutForm');
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
     }
 
-    const name = document.getElementById('custName').value.trim();
-    const phone = document.getElementById('custPhone').value.trim();
-    const address = document.getElementById('custAddress').value.trim();
-    const apt = document.getElementById('custApt').value.trim();
-    const floor = document.getElementById('custFloor').value.trim();
-    const entrance = document.getElementById('custEntrance').value.trim();
-    const comment = document.getElementById('custComment').value.trim();
+    const name = sanitizeString(document.getElementById('custName').value);
+    const phone = sanitizeString(document.getElementById('custPhone').value);
+    const address = sanitizeString(document.getElementById('custAddress').value);
+    const apt = sanitizeString(document.getElementById('custApt').value);
+    const floor = sanitizeString(document.getElementById('custFloor').value);
+    const entrance = sanitizeString(document.getElementById('custEntrance').value);
+    const comment = sanitizeString(document.getElementById('custComment').value);
 
     // Timing Validation
     let deliveryTimeText = 'Как можно скорее';
     if (orderTiming === 'scheduled') {
-        const date = document.getElementById('orderDate').value;
-        const time = document.getElementById('orderTime').value;
+        const date = sanitizeString(document.getElementById('orderDate').value);
+        const time = sanitizeString(document.getElementById('orderTime').value);
         
         if (!date || !time) {
             alert(currentLang === 'en' ? "Please select date and time for pre-order" : "Пожалуйста, выберите дату и время для предзаказа");
@@ -1266,6 +1287,7 @@ async function submitOrder() {
         }
 
         console.log("Заказ успешно сохранен!");
+        localStorage.setItem('lastOrderTime', Date.now().toString());
         alert(currentLang === 'en' ? "Order successfully saved! Opening WhatsApp..." : "Заказ успешно сохранен! Переходим в WhatsApp...");
 
         // 2. Prepare WhatsApp message
