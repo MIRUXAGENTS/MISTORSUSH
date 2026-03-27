@@ -355,7 +355,7 @@ function renderMenu() {
             <div class="h-px bg-white/10 flex-grow"></div>
         </h2>
         
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             ${itemsToRender.map(item => {
         const isUnusualItem = getCategoryOfItem(item.id) === "Необычные роллы";
         const shadowClass = isUnusualItem ? 'shadow-[0_0_20px_rgba(218,165,32,0.15)] shadow-black/40' : 'shadow-lg shadow-black/30';
@@ -378,21 +378,34 @@ function renderMenu() {
         const opacityClass = isAvailable ? '' : 'opacity-60 grayscale-[0.7] contrast-[0.8]';
 
         return `
-                <div class="product-card flex flex-col justify-between ${itemBg} p-4 rounded-2xl border ${itemBorder} ${shadowClass} transition-all duration-300 ${opacityClass} relative">
+                <div class="product-card flex gap-4 ${itemBg} p-4 rounded-[1.5rem] border ${itemBorder} ${shadowClass} transition-all duration-300 ${opacityClass} relative group hover:border-brand/40">
                     ${!isAvailable ? `<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none flex justify-center">
-                        <span class="bg-black/60 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-2xl">
+                        <span class="bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-2xl">
                             ${i18n[currentLang].outOfStock}
                         </span>
                     </div>` : ''}
-                    ${item.image ? `<div class="w-full flex justify-center mb-3"><img src="${item.image}" alt="${item.name}" class="h-28 object-contain drop-shadow-md"></div>` : ''}
-                    <div class="mb-3">
-                        <h3 class="font-bold text-[17px] leading-snug mb-1.5 text-white/95">${currentLang === 'en' ? item.nameEn : item.name}</h3>
-                        <p class="text-xs text-muted leading-relaxed line-clamp-3">${currentLang === 'en' ? item.ingredientsEn : item.ingredients}</p>
+                    
+                    ${item.image ? `
+                    <div class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-2xl overflow-hidden shadow-lg relative transition-all group-hover:scale-105 duration-300 cursor-zoom-in" onclick="openImageModal('${item.image}')">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center pt-3 border-t border-white/5 mt-auto">
-                        <span class="font-bold text-lg text-brand ${!isAvailable ? 'opacity-50' : ''}">${item.price}₪</span>
-                        <div class="cart-controls" id="controls-${item.id}">
-                            ${isAvailable ? renderControlsHTML(item.id) : ''}
+                    ` : ''}
+
+                    <div class="flex-grow flex flex-col justify-between py-0.5">
+                        <div class="mb-2">
+                            <h3 class="font-bold text-[14px] sm:text-[16px] leading-snug text-white/95 mb-1 line-clamp-2">${currentLang === 'en' ? item.nameEn : item.name}</h3>
+                            <p class="text-[10px] sm:text-[11px] text-muted leading-relaxed line-clamp-2 opacity-70">${currentLang === 'en' ? item.ingredientsEn : item.ingredients}</p>
+                        </div>
+                        <div class="flex justify-between items-center transition-all">
+                            <span class="font-black text-sm sm:text-lg text-brand ${!isAvailable ? 'opacity-50' : ''}">${item.price}₪</span>
+                            <div class="cart-controls" id="controls-${item.id}">
+                                ${isAvailable ? renderControlsHTML(item.id) : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1773,4 +1786,36 @@ async function loadUserOrders() {
         container.innerHTML = `<div class="text-center py-4 text-brand text-[8px] uppercase font-black tracking-widest">Error loading orders</div>`;
         console.error(err);
     }
+}
+
+function openImageModal(url) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('lightboxImage');
+    if (!modal || !img) return;
+
+    img.src = url;
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    
+    // Smooth entry animation
+    setTimeout(() => {
+        img.classList.remove('scale-90', 'translate-y-10', 'opacity-0');
+        img.classList.add('scale-100', 'translate-y-0', 'opacity-100');
+    }, 50);
+
+    // Disable body scroll
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('lightboxImage');
+    if (!modal || !img) return;
+
+    img.classList.add('scale-90', 'translate-y-10', 'opacity-0');
+    img.classList.remove('scale-100', 'translate-y-0', 'opacity-100');
+
+    setTimeout(() => {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = '';
+    }, 300);
 }

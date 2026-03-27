@@ -7,13 +7,15 @@
     <title>Суши Ашкелон | Mistorsush Доставка запеченных роллов</title>
     <meta name="description"
         content="Заказывайте лучшие суши и роллы в Ашкелоне от Mistorsush! Доставка вкусных классических и запеченных сетов. Скидка 2+1 каждую пятницу!">
-    <meta name="keywords" content="суши ашкелон, доставка суши ашкелон, роллы ашкелон, запеченные ролы, мисторсуш, mistorsush, заказать суши ашкелон, суши доставка израиль">
-    
+    <meta name="keywords"
+        content="суши ашкелон, доставка суши ашкелон, роллы ашкелон, запеченные ролы, мисторсуш, mistorsush, заказать суши ашкелон, суши доставка израиль">
+
     <!-- Open Graph / WhatsApp Sharing -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://iceblinkil.github.io/MISTORSUSH/">
     <meta property="og:title" content="Mistorsush | Доставка суши в Ашкелоне">
-    <meta property="og:description" content="Лучшие запеченные роллы в городе. Заказывай прямо сейчас через удобный сайт!">
+    <meta property="og:description"
+        content="Лучшие запеченные роллы в городе. Заказывай прямо сейчас через удобный сайт!">
     <meta property="og:image" content="https://iceblinkil.github.io/MISTORSUSH/img/mistorsush_logo.png">
 
     <!-- Twitter -->
@@ -390,79 +392,89 @@
                                     class="w-full bg-card border border-white/10 rounded-xl px-3 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition text-sm">
                             </div>
                         </div>
-                        </div>
                     </div>
-
-                    <!-- Order Timing (Pre-order) -->
-                    <div id="orderTimingSection" class="pt-2 border-t border-white/5 space-y-4 hidden">
-                        <label class="block text-[11px] font-semibold text-muted mb-1 ml-1 uppercase tracking-[0.2em]">Время доставки</label>
-                        <div class="flex bg-dark/50 rounded-2xl p-1 border border-white/5 relative h-11">
-                            <div id="timingIndicator" class="absolute inset-y-1 left-1 w-1/2 bg-white/5 rounded-xl transition-all duration-300"></div>
-                            <button type="button" onclick="setOrderTiming('asap')" class="flex-1 text-[10px] font-black uppercase tracking-widest text-white relative z-10" id="btnASAP">Как можно скорее</button>
-                            <button type="button" onclick="setOrderTiming('scheduled')" class="flex-1 text-[10px] font-black uppercase tracking-widest text-white/40 relative z-10" id="btnScheduled">Предзаказ</button>
-                        </div>
-                        
-                        <div id="scheduledFields" class="hidden grid grid-cols-2 gap-3 pb-2 transition-all">
-                            <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Дата</label>
-                                <input type="date" id="orderDate" class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand transition text-xs">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Время (12:00-23:00)</label>
-                                <input type="time" id="orderTime" min="12:00" max="23:00" class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand transition text-xs">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Additional Info -->
-                    <div class="pt-2">
-                        <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide"
-                            data-i18n="commentField">Комментарий к заказу</label>
-                        <textarea id="custComment" placeholder="Например, без лука, позвонить за 5 минут..."
-                            data-i18n-placeholder="commentPlaceholder" rows="2" maxlength="200"
-                            class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition resize-none text-sm"></textarea>
-                    </div>
-                </form>
-
-                <!-- Summary & Submit in Scroll Area -->
-                <div class="pt-6 border-t border-white/5 space-y-4">
-                    <div class="bg-card/40 rounded-2xl p-5 border border-white/5 space-y-3">
-                        <div class="flex justify-between text-xs text-muted uppercase font-black tracking-widest">
-                            <span data-i18n="subtotal">Сумма заказа:</span>
-                            <span id="checkoutSubtotal" class="text-white">0₪</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-brand font-black uppercase tracking-widest" id="checkoutDiscountRow"
-                            style="display: none;">
-                            <span data-i18n="discount2plus1">Скидка 2+1:</span>
-                            <span id="checkoutDiscountValue">-0₪</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-muted uppercase font-black tracking-widest" id="checkoutDeliveryRow">
-                            <span data-i18n="deliveryCostLabel">Доставка:</span>
-                            <span id="checkoutDeliveryCost" class="text-white">30₪</span>
-                        </div>
-                        <div class="flex justify-between text-base font-black text-white pt-3 border-t border-white/5 mt-1 uppercase tracking-wider">
-                            <span data-i18n="totalToPay">Итого:</span>
-                            <span id="checkoutTotal" class="text-brand">0₪</span>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="submitOrder()"
-                        class="w-full bg-[#25D366] text-white font-black py-4 rounded-2xl active:scale-[0.98] transition shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-3 uppercase text-[10px] tracking-[0.2em]">
-                        <span data-i18n="sendWhatsapp">Отправить в WhatsApp</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-                            class="w-4 h-4">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                    </button>
-                </div>
-
             </div>
 
-            <!-- Removed fixed footer -->
+            <!-- Order Timing (Pre-order) -->
+            <div id="orderTimingSection" class="pt-2 border-t border-white/5 space-y-4 hidden">
+                <label class="block text-[11px] font-semibold text-muted mb-1 ml-1 uppercase tracking-[0.2em]">Время
+                    доставки</label>
+                <div class="flex bg-dark/50 rounded-2xl p-1 border border-white/5 relative h-11">
+                    <div id="timingIndicator"
+                        class="absolute inset-y-1 left-1 w-1/2 bg-white/5 rounded-xl transition-all duration-300"></div>
+                    <button type="button" onclick="setOrderTiming('asap')"
+                        class="flex-1 text-[10px] font-black uppercase tracking-widest text-white relative z-10"
+                        id="btnASAP">Как можно скорее</button>
+                    <button type="button" onclick="setOrderTiming('scheduled')"
+                        class="flex-1 text-[10px] font-black uppercase tracking-widest text-white/40 relative z-10"
+                        id="btnScheduled">Предзаказ</button>
+                </div>
+
+                <div id="scheduledFields" class="hidden grid grid-cols-2 gap-3 pb-2 transition-all">
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Дата</label>
+                        <input type="date" id="orderDate"
+                            class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand transition text-xs">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Время
+                            (12:00-23:00)</label>
+                        <input type="time" id="orderTime" min="12:00" max="23:00"
+                            class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand transition text-xs">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="pt-2">
+                <label class="block text-[11px] font-semibold text-muted mb-1.5 ml-1 uppercase tracking-wide"
+                    data-i18n="commentField">Комментарий к заказу</label>
+                <textarea id="custComment" placeholder="Например, без лука, позвонить за 5 минут..."
+                    data-i18n-placeholder="commentPlaceholder" rows="2" maxlength="200"
+                    class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand transition resize-none text-sm"></textarea>
+            </div>
+            </form>
+
+            <!-- Summary & Submit in Scroll Area -->
+            <div class="pt-6 border-t border-white/5 space-y-4">
+                <div class="bg-card/40 rounded-2xl p-5 border border-white/5 space-y-3">
+                    <div class="flex justify-between text-xs text-muted uppercase font-black tracking-widest">
+                        <span data-i18n="subtotal">Сумма заказа:</span>
+                        <span id="checkoutSubtotal" class="text-white">0₪</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-brand font-black uppercase tracking-widest"
+                        id="checkoutDiscountRow" style="display: none;">
+                        <span data-i18n="discount2plus1">Скидка 2+1:</span>
+                        <span id="checkoutDiscountValue">-0₪</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-muted uppercase font-black tracking-widest"
+                        id="checkoutDeliveryRow">
+                        <span data-i18n="deliveryCostLabel">Доставка:</span>(faviconite">30₪</span>
+                    </div>
+                    <div
+                        class="flex justify-between text-base font-black text-white pt-3 border-t border-white/5 mt-1 uppercase tracking-wider">
+                        <span data-i18n="totalToPay">Итого:</span>
+                        <span id="checkoutTotal" class="text-brand">0₪</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="submitOrder()"
+                    class="w-full bg-[#25D366] text-white font-black py-4 rounded-2xl active:scale-[0.98] transition shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-3 uppercase text-[10px] tracking-[0.2em]">
+                    <span data-i18n="sendWhatsapp">Отправить в WhatsApp</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                        class="w-4 h-4">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                </button>
+            </div>
 
         </div>
+
+        <!-- Removed fixed footer -->
+
+    </div>
     </div>
     <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" onclick="scrollToTop()"
@@ -530,7 +542,7 @@
         </div>
     </div>
     </div>
-    
+
     <!-- Auth Modal -->
     <div id="authModal"
         class="fixed inset-0 z-[70] flex justify-center items-end sm:items-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
@@ -580,10 +592,14 @@
             id="profileModalContent">
             <div class="flex justify-between items-center p-5 border-b border-white/10 bg-card/30">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-xl shadow-inner mt-1">👤</div>
+                    <div
+                        class="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-xl shadow-inner mt-1">
+                        👤</div>
                     <div class="flex flex-col">
-                        <h2 class="text-sm font-black text-white uppercase tracking-wider" id="profileUserName">Загрузка...</h2>
-                        <span class="text-[10px] text-muted font-bold tracking-widest uppercase" id="profileUserEmail">...</span>
+                        <h2 class="text-sm font-black text-white uppercase tracking-wider" id="profileUserName">
+                            Загрузка...</h2>
+                        <span class="text-[10px] text-muted font-bold tracking-widest uppercase"
+                            id="profileUserEmail">...</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -593,7 +609,8 @@
                             stroke="currentColor" class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.127 1.046 1.046 0 0 0-.645.87l-.213 1.282c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281a1.046 1.046 0 0 0-.645-.87 6.558 6.558 0 0 1-.22-.127 1.046 1.046 0 0 0-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         </svg>
                     </button>
                     <button onclick="closeProfileModal()"
@@ -605,55 +622,69 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="flex-grow overflow-y-auto custom-scrollbar">
                 <div class="p-6 space-y-8">
                     <!-- Profile Settings -->
                     <div class="space-y-4">
-                        <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2">Мои данные</h3>
+                        <h3
+                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2">
+                            Мои данные</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Имя</label>
+                                <label
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Имя</label>
                                 <input type="text" id="profileName" placeholder="Иван Иванов"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Телефон</label>
+                                <label
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Телефон</label>
                                 <input type="tel" id="profilePhone" placeholder="05x-xxxxxxx"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Адрес доставки</label>
+                            <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Адрес
+                                доставки</label>
                             <input type="text" id="profileAddress" placeholder="Город, Улица и Дом"
                                 class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                         </div>
                         <div class="grid grid-cols-3 gap-3">
                             <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Кв.</label>
+                                <label
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Кв.</label>
                                 <input type="text" id="profileApt" placeholder="Кв."
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Этаж</label>
+                                <label
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Этаж</label>
                                 <input type="text" id="profileFloor" placeholder="Этаж"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Подъезд</label>
+                                <label
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Подъезд</label>
                                 <input type="text" id="profileEntrance" placeholder="Подъезд"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                         </div>
-                        <button onclick="saveProfile()" class="text-[10px] font-black uppercase tracking-widest text-brand hover:text-white transition-colors">Сохранить изменения</button>
+                        <button onclick="saveProfile()"
+                            class="text-[10px] font-black uppercase tracking-widest text-brand hover:text-white transition-colors">Сохранить
+                            изменения</button>
                     </div>
 
                     <!-- Order History -->
                     <div class="space-y-4 pt-4">
-                        <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2">История запеченных удовольствий</h3>
+                        <h3
+                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2">
+                            История запеченных удовольствий</h3>
                         <div id="userOrderHistory" class="space-y-3">
                             <!-- Orders loaded via JS -->
-                            <div class="text-center py-8 text-muted text-[10px] uppercase font-bold tracking-widest opacity-50 italic">Заказов пока нет...</div>
+                            <div
+                                class="text-center py-8 text-muted text-[10px] uppercase font-bold tracking-widest opacity-50 italic">
+                                Заказов пока нет...</div>
                         </div>
                     </div>
                 </div>
@@ -675,7 +706,9 @@
             id="settingsModalContent">
             <div class="flex justify-between items-center p-5 border-b border-white/10">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-lg shadow-inner">⚙️</div>
+                    <div
+                        class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-lg shadow-inner">
+                        ⚙️</div>
                     <h2 class="text-xl font-bold text-white tracking-tight">Безопасность</h2>
                 </div>
                 <button onclick="closeSettingsModal()"
@@ -689,20 +722,26 @@
             <div class="p-6">
                 <div class="space-y-6">
                     <div class="space-y-4">
-                        <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 pb-2 border-b border-white/5">Смена пароля</h3>
+                        <h3
+                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 pb-2 border-b border-white/5">
+                            Смена пароля</h3>
                         <div class="space-y-4">
                             <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Текущий пароль</label>
+                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Текущий
+                                    пароль</label>
                                 <input type="password" id="oldPassword" placeholder="••••••••"
                                     class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Новый пароль</label>
+                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Новый
+                                    пароль</label>
                                 <input type="password" id="newPassword" placeholder="••••••••"
                                     class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Подтвердите новый пароль</label>
+                                <label
+                                    class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Подтвердите
+                                    новый пароль</label>
                                 <input type="password" id="confirmNewPassword" placeholder="••••••••"
                                     class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                             </div>
@@ -716,7 +755,7 @@
             </div>
         </div>
     </div>
-        </div>
+    </div>
     </div>
 
     <!-- Order Details Modal -->
@@ -726,8 +765,10 @@
             id="orderDetailsModalContent">
             <div class="flex justify-between items-center p-5 border-b border-white/10">
                 <div class="flex flex-col">
-                    <h2 class="text-sm font-black text-white uppercase tracking-wider" id="orderDetailsTitle">Детали заказа</h2>
-                    <span class="text-[10px] text-muted font-bold tracking-widest uppercase" id="orderDetailsDate">...</span>
+                    <h2 class="text-sm font-black text-white uppercase tracking-wider" id="orderDetailsTitle">Детали
+                        заказа</h2>
+                    <span class="text-[10px] text-muted font-bold tracking-widest uppercase"
+                        id="orderDetailsDate">...</span>
                 </div>
                 <button onclick="closeOrderDetailsModal()"
                     class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition border border-white/5">
@@ -738,7 +779,8 @@
                 </button>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar flex-grow">
-                <div id="orderDetailsContent" class="space-y-4 text-sm text-white/80 leading-relaxed font-medium whitespace-pre-wrap">
+                <div id="orderDetailsContent"
+                    class="space-y-4 text-sm text-white/80 leading-relaxed font-medium whitespace-pre-wrap">
                     <!-- Loaded via JS -->
                 </div>
             </div>
@@ -750,6 +792,22 @@
             </div>
         </div>
     </div>
+    
+    <!-- Image Lightbox Modal -->
+    <div id="imageModal" 
+        class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl opacity-0 pointer-events-none transition-all duration-300 flex items-center justify-center p-4">
+        <button onclick="closeImageModal()" 
+            class="absolute top-6 right-6 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white active:scale-95 transition-all z-[110] hover:bg-brand shadow-2xl border border-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="relative max-w-5xl w-full h-full flex items-center justify-center" onclick="closeImageModal()">
+            <img id="lightboxImage" src="" alt="Zoomed view" 
+                class="max-w-full max-h-[85vh] object-contain rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.5)] transition-all duration-500 scale-90 translate-y-10 opacity-0">
+        </div>
+    </div>
+
 </body>
 
 </html>
