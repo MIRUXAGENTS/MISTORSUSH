@@ -3,7 +3,7 @@ const menuData = [
     category: "Классические роллы",
     categoryEn: "Classic Rolls",
     items: [
-      { id: "c1", name: "Маки Лосось", nameEn: "Salmon Maki", price: 30, ingredients: "", ingredientsEn: "" },
+      { id: "c1", name: "Маки Лосось", nameEn: "Salmon Maki", price: 30, ingredients: "", ingredientsEn: "", image: "img/products/classic_rolls/salomon_maki.webp" },
       { id: "c2", name: "Маки Авокадо", nameEn: "Avocado Maki", price: 28, ingredients: "", ingredientsEn: "" },
       { id: "c3", name: "Маки Кампье", nameEn: "Kampye Maki", price: 25, ingredients: "", ingredientsEn: "" },
       { id: "c4", name: "Маки Огурец", nameEn: "Cucumber Maki", price: 25, ingredients: "", ingredientsEn: "" },
@@ -20,7 +20,7 @@ const menuData = [
       { id: "c15", name: "Креветка Панко (не жаренный)", nameEn: "Panko Shrimp (non-fried)", price: 45, ingredients: "Рис, кремчиз, креветка, хасса, панировочные сухари", ingredientsEn: "Rice, cream cheese, shrimp, lettuce, breadcrumbs" },
       { id: "c16", name: "Лосось Панко (не жаренный)", nameEn: "Panko Salmon (non-fried)", price: 50, ingredients: "Рис, кремчиз, лосось, хасса, панировочные сухари", ingredientsEn: "Rice, cream cheese, salmon, lettuce, breadcrumbs" },
       { id: "c17", name: "Сырная креветка", nameEn: "Cheese Shrimp", price: 50, ingredients: "Рис, кремчиз, креветка, огурец, сыр чеддер сверху", ingredientsEn: "Rice, cream cheese, shrimp, cucumber, cheddar cheese on top", image: "img/products/classic_rolls/Cheese_Shrimp.webp" },
-      { id: "c18", name: "Закрытый грибник", nameEn: "Hidden Mushroom", price: 55, ingredients: "Рис, кремчиз, огурец, грибы шампиньоны (жаренные)", ingredientsEn: "Rice, cream cheese, cucumber, fried mushrooms" },
+      { id: "c18", name: "Закрытый грибник", nameEn: "Hidden Mushroom", price: 55, ingredients: "Рис, кремчиз, огурец, грибы шампиньоны (жаренные)", ingredientsEn: "Rice, cream cheese, cucumber, fried mushrooms", image: "img/products/classic_rolls/Hidden_Mushroom.webp" },
       { id: "c19", name: "Веганский рай", nameEn: "Vegan Paradise", price: 45, ingredients: "Рис, морковка, батат (запеченный), огурец, хасса, кампье", ingredientsEn: "Rice, carrot, sweet potato (baked), cucumber, lettuce, kanpyo" },
       { id: "c20", name: "Морской бриз", nameEn: "Sea Breeze", price: 55, ingredients: "Рис, креветка, кремчиз, сверху морская капуста, кунжут", ingredientsEn: "Rice, shrimp, cream cheese, seaweed on top, sesame" },
       { id: "c21", name: "Калифорния", nameEn: "California", price: 60, ingredients: "Рис, лосось, кремчиз, огурец, сверху оранжевая тобика", ingredientsEn: "Rice, salmon, cream cheese, cucumber, orange tobiko on top" }
@@ -30,7 +30,7 @@ const menuData = [
     category: "Запеченные роллы",
     categoryEn: "Baked Rolls",
     items: [
-      { id: "z1", name: "Грибной Амур", nameEn: "Mushroom Amur", price: 60, ingredients: "Рис, грибы шампиньоны, кремчиз, красный болгарский перец, помидор, сырная шапка", ingredientsEn: "Rice, mushrooms, cream cheese, red bell pepper, tomato, cheese topping" },
+      { id: "z1", name: "Грибной Амур", nameEn: "Mushroom Amur", price: 60, ingredients: "Рис, грибы шампиньоны, кремчиз, красный болгарский перец, помидор, сырная шапка", ingredientsEn: "Rice, mushrooms, cream cheese, red bell pepper, tomato, cheese topping", image: "img/products/baked_rolls/Mushroom_Amur.webp" },
       { id: "z2", name: "Белый самурай", nameEn: "White Samurai", price: 60, ingredients: "Рис, лосось, омлет тамаго, креветка, сырная шапка, сверху кунжут и терияки", ingredientsEn: "Rice, salmon, tamago omelet, shrimp, cheese topping, sesame and teriyaki on top" },
       { id: "z3", name: "Бурный авокадо", nameEn: "Stormy Avocado", price: 60, ingredients: "Рис, лосось, авокадо, морковка, огурец, сырная шапка", ingredientsEn: "Rice, salmon, avocado, carrot, cucumber, cheese topping" },
       { id: "z4", name: "Веган бум", nameEn: "Vegan Boom", price: 55, ingredients: "Рис, авокадо, морковка, огурец, кампье, хасса, сырная шапка, терияки и кунжут", ingredientsEn: "Rice, avocado, carrot, cucumber, kanpyo, lettuce, cheese topping, teriyaki and sesame" }
@@ -50,7 +50,7 @@ const menuData = [
     category: "Рисовые гамбургеры",
     categoryEn: "Rice Burgers",
     items: [
-      { id: "b1", name: "Рисовый гамбургер", nameEn: "Rice Burger", price: 55, ingredients: "Начинки на выбор. Жаренные появятся позже", ingredientsEn: "Choice of fillings. Fried options coming soon" }
+      { id: "b1", name: "Рисовый гамбургер", nameEn: "Rice Burger", price: 55, ingredients: "Начинки на выбор. Жаренные появятся позже", ingredientsEn: "Choice of fillings. Fried options coming soon", image: "img/products/burgers/Rice_Burger.webp" }
     ]
   },
   {

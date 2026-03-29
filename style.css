@@ -119,3 +119,33 @@ body {
     padding: 2px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
+
+/* Form Validation Styles */
+.is-invalid {
+    border-color: #ef4444 !important; /* text-red-500 */
+    box-shadow: 0 0 0 1px #ef4444 !important;
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.error-message {
+    font-size: 10px;
+    color: #ef4444;
+    margin-top: 4px;
+    margin-left: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+input:focus.is-invalid {
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+

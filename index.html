@@ -322,7 +322,7 @@
                         data-i18n="pickup">Самовывоз</button>
                 </div>
 
-                <form id="checkoutForm" class="space-y-4 pb-4">
+                <form id="checkoutForm" class="space-y-4 pb-4" novalidate>
                     <!-- General Fields -->
                     <div>
                         <label
@@ -397,27 +397,27 @@
 
             <!-- Order Timing (Pre-order) -->
             <div id="orderTimingSection" class="pt-2 border-t border-white/5 space-y-4 hidden">
-                <label class="block text-[11px] font-semibold text-muted mb-1 ml-1 uppercase tracking-[0.2em]">Время
+                <label class="block text-[11px] font-semibold text-muted mb-1 ml-1 uppercase tracking-[0.2em]" data-i18n="timingLab">Время
                     доставки</label>
                 <div class="flex bg-dark/50 rounded-2xl p-1 border border-white/5 relative h-11">
                     <div id="timingIndicator"
                         class="absolute inset-y-1 left-1 w-1/2 bg-white/5 rounded-xl transition-all duration-300"></div>
                     <button type="button" onclick="setOrderTiming('asap')"
                         class="flex-1 text-[10px] font-black uppercase tracking-widest text-white relative z-10"
-                        id="btnASAP">Как можно скорее</button>
+                        id="btnASAP" data-i18n="timingASAP">Как можно скорее</button>
                     <button type="button" onclick="setOrderTiming('scheduled')"
                         class="flex-1 text-[10px] font-black uppercase tracking-widest text-white/40 relative z-10"
-                        id="btnScheduled">Предзаказ</button>
+                        id="btnScheduled" data-i18n="timingScheduled">Предзаказ</button>
                 </div>
 
                 <div id="scheduledFields" class="hidden grid grid-cols-2 gap-3 pb-2 transition-all">
                     <div class="space-y-1">
-                        <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Дата</label>
+                        <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="timingDate">Дата</label>
                         <input type="date" id="orderDate"
                             class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand transition text-xs">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Время
+                        <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="timingTime">Время
                             (12:00-23:00)</label>
                         <input type="time" id="orderTime" min="12:00" max="23:00"
                             class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-brand transition text-xs">
@@ -559,23 +559,23 @@
                 </button>
             </div>
             <div class="p-6">
-                <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+                <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4" novalidate>
                     <div class="space-y-1">
-                        <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Email</label>
+                        <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="authEmailLab">Email</label>
                         <input type="email" id="authEmail" required placeholder="example@mail.com"
                             class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Пароль</label>
+                        <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="authPassLab">Пароль</label>
                         <input type="password" id="authPassword" required placeholder="••••••••"
                             class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                     </div>
-                    <button type="submit" id="authSubmitBtn"
+                    <button type="submit" id="authSubmitBtn" data-i18n="authLoginBtn"
                         class="w-full bg-brand text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition shadow-lg shadow-brand/20 mt-4 uppercase text-xs tracking-widest">
                         Войти
                     </button>
                     <div class="text-center mt-4">
-                        <button type="button" onclick="toggleAuthMode()" id="authToggleBtn"
+                        <button type="button" onclick="toggleAuthMode()" id="authToggleBtn" data-i18n="authNoAccount"
                             class="text-[11px] text-muted hover:text-white transition-colors uppercase tracking-widest font-bold">
                             Нет аккаунта? Зарегистрироваться
                         </button>
@@ -596,7 +596,7 @@
                         class="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-xl shadow-inner mt-1">
                         👤</div>
                     <div class="flex flex-col">
-                        <h2 class="text-sm font-black text-white uppercase tracking-wider" id="profileUserName">
+                        <h2 class="text-sm font-black text-white uppercase tracking-wider" id="profileUserName" data-i18n="profileUnnamed">
                             Загрузка...</h2>
                         <span class="text-[10px] text-muted font-bold tracking-widest uppercase"
                             id="profileUserEmail">...</span>
@@ -628,49 +628,49 @@
                     <!-- Profile Settings -->
                     <div class="space-y-4">
                         <h3
-                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2">
+                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2" data-i18n="profileTitle">
                             Мои данные</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-1">
                                 <label
-                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Имя</label>
-                                <input type="text" id="profileName" placeholder="Иван Иванов"
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="nameField">Имя</label>
+                                <input type="text" id="profileName" placeholder="Иван Иванов" data-i18n-placeholder="namePlaceholder"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                             <div class="space-y-1">
                                 <label
-                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Телефон</label>
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="phoneField">Телефон</label>
                                 <input type="tel" id="profilePhone" placeholder="05x-xxxxxxx"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Адрес
+                            <label class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="addressField">Адрес
                                 доставки</label>
-                            <input type="text" id="profileAddress" placeholder="Город, Улица и Дом"
+                            <input type="text" id="profileAddress" placeholder="Город, Улица и Дом" data-i18n-placeholder="addressPlaceholder"
                                 class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                         </div>
                         <div class="grid grid-cols-3 gap-3">
                             <div class="space-y-1">
                                 <label
-                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Кв.</label>
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="aptField">Кв.</label>
                                 <input type="text" id="profileApt" placeholder="Кв."
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                             <div class="space-y-1">
                                 <label
-                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Этаж</label>
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="floorField">Этаж</label>
                                 <input type="text" id="profileFloor" placeholder="Этаж"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                             <div class="space-y-1">
                                 <label
-                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1">Подъезд</label>
+                                    class="text-[9px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="entranceField">Подъезд</label>
                                 <input type="text" id="profileEntrance" placeholder="Подъезд"
                                     class="w-full bg-card border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/10 outline-none focus:border-brand/40 transition">
                             </div>
                         </div>
-                        <button onclick="saveProfile()"
+                        <button onclick="saveProfile()" data-i18n="profileSaveBtn"
                             class="text-[10px] font-black uppercase tracking-widest text-brand hover:text-white transition-colors">Сохранить
                             изменения</button>
                     </div>
@@ -678,12 +678,12 @@
                     <!-- Order History -->
                     <div class="space-y-4 pt-4">
                         <h3
-                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2">
+                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 border-b border-brand/10 pb-2" data-i18n="profileHistoryTitle">
                             История запеченных удовольствий</h3>
                         <div id="userOrderHistory" class="space-y-3">
                             <!-- Orders loaded via JS -->
                             <div
-                                class="text-center py-8 text-muted text-[10px] uppercase font-bold tracking-widest opacity-50 italic">
+                                class="text-center py-8 text-muted text-[10px] uppercase font-bold tracking-widest opacity-50 italic" data-i18n="profileOrdersEmpty">
                                 Заказов пока нет...</div>
                         </div>
                     </div>
@@ -691,7 +691,7 @@
             </div>
 
             <div class="p-4 border-t border-white/5 bg-dark/50">
-                <button onclick="handleLogout()"
+                <button onclick="handleLogout()" data-i18n="profileLogoutBtn"
                     class="w-full bg-white/5 text-muted hover:text-brand hover:border-brand/20 border border-white/10 font-black py-3 rounded-xl active:scale-[0.98] transition uppercase text-[10px] tracking-[0.2em]">
                     Выйти из аккаунта
                 </button>
@@ -709,7 +709,7 @@
                     <div
                         class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-lg shadow-inner">
                         ⚙️</div>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Безопасность</h2>
+                    <h2 class="text-xl font-bold text-white tracking-tight" data-i18n="settingsTitle">Безопасность</h2>
                 </div>
                 <button onclick="closeSettingsModal()"
                     class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition">
@@ -723,29 +723,29 @@
                 <div class="space-y-6">
                     <div class="space-y-4">
                         <h3
-                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 pb-2 border-b border-white/5">
+                            class="text-[11px] font-black uppercase tracking-[0.2em] text-brand/80 pb-2 border-b border-white/5" data-i18n="settingsSecurity">
                             Смена пароля</h3>
                         <div class="space-y-4">
                             <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Текущий
+                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="settingsOldPass">Текущий
                                     пароль</label>
                                 <input type="password" id="oldPassword" placeholder="••••••••"
                                     class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Новый
+                                <label class="text-[10px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="settingsNewPass">Новый
                                     пароль</label>
                                 <input type="password" id="newPassword" placeholder="••••••••"
                                     class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                             </div>
                             <div class="space-y-1">
                                 <label
-                                    class="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Подтвердите
+                                    class="text-[10px] uppercase font-black tracking-widest text-muted ml-1" data-i18n="settingsConfirmPass">Подтвердите
                                     новый пароль</label>
                                 <input type="password" id="confirmNewPassword" placeholder="••••••••"
                                     class="w-full bg-card border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 outline-none focus:border-brand transition text-sm">
                             </div>
-                            <button onclick="changePassword()" id="changePassBtn"
+                            <button onclick="changePassword()" id="changePassBtn" data-i18n="settingsUpdateBtn"
                                 class="w-full bg-brand text-white font-bold py-3.5 rounded-xl active:scale-[0.98] transition shadow-lg shadow-brand/20 mt-4 uppercase text-xs tracking-widest">
                                 Обновить пароль
                             </button>
@@ -765,7 +765,7 @@
             id="orderDetailsModalContent">
             <div class="flex justify-between items-center p-5 border-b border-white/10">
                 <div class="flex flex-col">
-                    <h2 class="text-sm font-black text-white uppercase tracking-wider" id="orderDetailsTitle">Детали
+                    <h2 class="text-sm font-black text-white uppercase tracking-wider" id="orderDetailsTitle" data-i18n="orderDetailsTitle">Детали
                         заказа</h2>
                     <span class="text-[10px] text-muted font-bold tracking-widest uppercase"
                         id="orderDetailsDate">...</span>
@@ -786,7 +786,7 @@
             </div>
             <div class="p-5 border-t border-white/5 bg-card/30">
                 <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-black uppercase text-muted tracking-widest">Итого</span>
+                    <span class="text-[10px] font-black uppercase text-muted tracking-widest" data-i18n="orderDetailsTotalLab">Итого</span>
                     <span class="text-xl font-bold text-brand" id="orderDetailsTotal">...₪</span>
                 </div>
             </div>

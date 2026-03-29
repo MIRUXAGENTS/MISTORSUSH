@@ -81,7 +81,55 @@ const i18n = {
         modeReadableFont: "Шрифт Arial",
         modeHighlightLinks: "Ссылки",
         modeSepia: "Сепия",
-        modeScreenReader: "Чтение вслух"
+        modeScreenReader: "Чтение вслух",
+        // New keys
+        authLoginTitle: "Вход в кабинет",
+        authRegisterTitle: "Регистрация",
+        authLoginBtn: "Войти",
+        authRegisterBtn: "Создать аккаунт",
+        authNoAccount: "Нет аккаунта? Зарегистрироваться",
+        authHaveAccount: "Уже есть аккаунт? Войти",
+        authEmailLab: "Email",
+        authPassLab: "Пароль",
+        profileTitle: "Мои данные",
+        profileHistoryTitle: "История запеченных удовольствий",
+        profileSaveBtn: "Сохранить изменения",
+        profileLogoutBtn: "Выйти из аккаунта",
+        profileUnnamed: "Инкогнито",
+        profileOrdersEmpty: "Заказов пока нет...",
+        settingsTitle: "Безопасность",
+        settingsSecurity: "Безопасность",
+        settingsOldPass: "Текущий пароль",
+        settingsNewPass: "Новый пароль",
+        settingsConfirmPass: "Подтвердите новый пароль",
+        settingsUpdateBtn: "Обновить пароль",
+        orderDetailsTitle: "Детали заказа",
+        orderDetailsDateLab: "Дата заказа",
+        orderDetailsTotalLab: "Итого",
+        statusNew: "🆕 Новый",
+        statusCooking: "🔥 Готовится",
+        statusTransit: "🛵 В пути",
+        statusCompleted: "✅ Завершен",
+        timingASAP: "Как можно скорее",
+        timingScheduled: "Предзаказ",
+        timingDate: "Дата",
+        timingTime: "Время (12:00-23:00)",
+        timingLab: "Время доставки",
+        validationEmpty: "Это поле обязательно",
+        validationEmail: "Неверный формат Email",
+        validationPhone: "Введите корректный номер (напр. 05x-xxxxxxx)",
+        validationPassShort: "Пароль слишком короткий (мин. 6 симв.)",
+        validationPassMatch: "Пароли не совпадают",
+        alertOrderWait: "Пожалуйста, подождите несколько минут перед повторным заказом.",
+        alertOrderPreorderSelect: "Пожалуйста, выберите дату и время для предзаказа",
+        alertOrderTimeRange: "Заказы принимаются только с 12:00 до 23:00",
+        alertOrderProcessing: "Обработка...",
+        alertOrderSuccess: "Заказ успешно сохранен! Переходим в WhatsApp...",
+        alertProfileUpdated: "Данные обновлены!",
+        alertPassChanged: "Пароль успешно изменен!",
+        alertAuthSuccessRegister: "Регистрация успешна! Теперь вы можете войти.",
+        alertError: "Ошибка: ",
+        confirmDelete: "Вы уверены?"
     },
     en: {
         subtitle: "Sushi in Ashkelon",
@@ -144,9 +192,146 @@ const i18n = {
         accessibilityTitle: "Accessibility",
         monochromeLabel: "Monochrome Mode",
         fontSizeLabel: "Font Size",
-        resetAccessibility: "Reset Settings"
+        resetAccessibility: "Reset Settings",
+        // New keys
+        authLoginTitle: "Login",
+        authRegisterTitle: "Registration",
+        authLoginBtn: "Login",
+        authRegisterBtn: "Create Account",
+        authNoAccount: "Don't have an account? Register",
+        authHaveAccount: "Already have an account? Login",
+        authEmailLab: "Email",
+        authPassLab: "Password",
+        profileTitle: "My Profile",
+        profileHistoryTitle: "Order History",
+        profileSaveBtn: "Save Changes",
+        profileLogoutBtn: "Logout",
+        profileUnnamed: "Unnamed Gourmet",
+        profileOrdersEmpty: "No orders yet...",
+        settingsTitle: "Security",
+        settingsSecurity: "Security",
+        settingsOldPass: "Current Password",
+        settingsNewPass: "New Password",
+        settingsConfirmPass: "Confirm New Password",
+        settingsUpdateBtn: "Update Password",
+        orderDetailsTitle: "Order Details",
+        orderDetailsDateLab: "Order Date",
+        orderDetailsTotalLab: "Total",
+        statusNew: "🆕 New",
+        statusCooking: "🔥 Cooking",
+        statusTransit: "🛵 In Transit",
+        statusCompleted: "✅ Completed",
+        timingASAP: "As soon as possible",
+        timingScheduled: "Pre-order",
+        timingDate: "Date",
+        timingTime: "Time (12:00-23:00)",
+        timingLab: "Delivery Time",
+        validationEmpty: "This field is required",
+        validationEmail: "Invalid Email format",
+        validationPhone: "Enter a valid number (e.g. 05x-xxxxxxx)",
+        validationPassShort: "Password too short (min. 6 chars)",
+        validationPassMatch: "Passwords do not match",
+        alertOrderWait: "Please wait a few minutes before placing another order.",
+        alertOrderPreorderSelect: "Please select date and time for pre-order",
+        alertOrderTimeRange: "Ordering is only available between 12:00 and 23:00",
+        alertOrderProcessing: "Processing...",
+        alertOrderSuccess: "Order successfully saved! Opening WhatsApp...",
+        alertProfileUpdated: "Profile updated!",
+        alertPassChanged: "Password successfully changed!",
+        alertAuthSuccessRegister: "Registration successful! You can now login.",
+        alertError: "Error: ",
+        confirmDelete: "Are you sure?"
     }
 };
+
+/**
+ * Universal translation helper
+ */
+function t(key) {
+    if (!i18n[currentLang] || !i18n[currentLang][key]) {
+        console.warn(`Translation key missing: ${key} for lang: ${currentLang}`);
+        return key;
+    }
+    return i18n[currentLang][key];
+}
+
+/**
+ * Form Validation Helpers
+ */
+function showError(fieldId, errorKey) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    clearError(fieldId);
+    field.classList.add('is-invalid');
+
+    const errorMsg = document.createElement('div');
+    errorMsg.className = 'error-message';
+    errorMsg.id = `${fieldId}-error`;
+    errorMsg.textContent = t(errorKey);
+    field.parentNode.appendChild(errorMsg);
+}
+
+function clearError(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    field.classList.remove('is-invalid');
+    const existingError = document.getElementById(`${fieldId}-error`);
+    if (existingError) existingError.remove();
+}
+
+function validateField(fieldId, rules = {}) {
+    const field = document.getElementById(fieldId);
+    if (!field) return true;
+
+    const value = field.value.trim();
+
+    if (rules.req && !value) {
+        showError(fieldId, 'validationEmpty');
+        return false;
+    }
+
+    if (rules.email && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            showError(fieldId, 'validationEmail');
+            return false;
+        }
+    }
+
+    if (rules.phone && value) {
+        // Simple check for Israeli format: starts with 05 and has 9-10 digits, or international 972
+        const phoneRegex = /^(?:05|\+9725)\d{8}$/;
+        // Remove spaces and dashes for check
+        const cleanPhone = value.replace(/[\s-]/g, '');
+        if (!phoneRegex.test(cleanPhone)) {
+            showError(fieldId, 'validationPhone');
+            return false;
+        }
+    }
+
+    if (rules.minLen && value.length < rules.minLen) {
+        showError(fieldId, 'validationPassShort'); // General key
+        return false;
+    }
+
+    if (rules.match && value !== document.getElementById(rules.match).value) {
+        showError(fieldId, 'validationPassMatch');
+        return false;
+    }
+
+    clearError(fieldId);
+    return true;
+}
+
+function clearAllErrors(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    container.querySelectorAll('.error-message').forEach(el => el.remove());
+}
+
 
 function applyLanguage() {
     document.documentElement.lang = currentLang;
@@ -202,6 +387,52 @@ async function init() {
     renderDrawer();
     selectCategory(0);
     updateCartWidget();
+    setupValidationListeners();
+}
+
+function setupValidationListeners() {
+    // Checkout fields
+    const checkoutFields = {
+        'custName': { req: true },
+        'custPhone': { req: true, phone: true },
+        'custAddress': { req: true }
+    };
+    
+    Object.keys(checkoutFields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => validateField(id, checkoutFields[id]));
+    });
+
+    // Auth fields
+    const authFields = {
+        'authEmail': { req: true, email: true },
+        'authPassword': { req: true, minLen: 6 }
+    };
+    Object.keys(authFields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => validateField(id, authFields[id]));
+    });
+
+    // Profile fields
+    const profileFields = {
+        'profileName': { req: true },
+        'profilePhone': { req: true, phone: true }
+    };
+    Object.keys(profileFields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => validateField(id, profileFields[id]));
+    });
+
+    // Settings fields
+    const settingsFields = {
+        'oldPassword': { req: true },
+        'newPassword': { req: true, minLen: 6 },
+        'confirmNewPassword': { req: true, match: 'newPassword' }
+    };
+    Object.keys(settingsFields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => validateField(id, settingsFields[id]));
+    });
 }
 
 function transformSupabaseData(data) {
@@ -1213,14 +1444,24 @@ async function submitOrder() {
     if (lastOrderTime) {
         const diff = Date.now() - parseInt(lastOrderTime);
         if (diff < 3 * 60 * 1000) { // 3 minutes
-            alert(currentLang === 'en' ? "Please wait a few minutes before placing another order." : "Пожалуйста, подождите несколько минут перед повторным заказом.");
+            alert(t('alertOrderWait'));
             return;
         }
     }
 
-    const form = document.getElementById('checkoutForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
+    clearAllErrors('checkoutModal');
+    
+    const nameValid = validateField('custName', { req: true });
+    const phoneValid = validateField('custPhone', { req: true, phone: true });
+    let addressValid = true;
+    if (orderType === 'delivery') {
+        addressValid = validateField('custAddress', { req: true });
+    }
+    
+    if (!nameValid || !phoneValid || !addressValid) {
+        // Find first invalid and scroll to it if needed
+        const firstInvalid = document.querySelector('#checkoutModal .is-invalid');
+        if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
 
@@ -1233,19 +1474,19 @@ async function submitOrder() {
     const comment = sanitizeString(document.getElementById('custComment').value);
 
     // Timing Validation
-    let deliveryTimeText = 'Как можно скорее';
+    let deliveryTimeText = t('timingASAP');
     if (orderTiming === 'scheduled') {
         const date = sanitizeString(document.getElementById('orderDate').value);
         const time = sanitizeString(document.getElementById('orderTime').value);
         
         if (!date || !time) {
-            alert(currentLang === 'en' ? "Please select date and time for pre-order" : "Пожалуйста, выберите дату и время для предзаказа");
+            alert(t('alertOrderPreorderSelect'));
             return;
         }
         
         const hour = parseInt(time.split(':')[0]);
         if (hour < 12 || hour >= 23) {
-            alert(currentLang === 'en' ? "Ordering is only available between 12:00 and 23:00" : "Заказы принимаются только с 12:00 до 23:00");
+            alert(t('alertOrderTimeRange'));
             return;
         }
         
@@ -1255,7 +1496,7 @@ async function submitOrder() {
     const btn = document.querySelector('button[onclick="submitOrder()"]');
     const originalBtnContent = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${currentLang === 'en' ? 'Processing...' : 'Обработка...'}`;
+    btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> ${t('alertOrderProcessing')}`;
 
     const subtotal = calculateSubtotal();
     const deliveryCost = orderType === 'delivery' ? (subtotal >= 250 ? 0 : 30) : 0;
@@ -1282,8 +1523,6 @@ async function submitOrder() {
     }
 
     try {
-        console.log("Начинаю отправку заказа в Supabase...");
-
         if (sb) {
             const orderData = {
                 customer_name: name,
@@ -1307,45 +1546,43 @@ async function submitOrder() {
             const { error } = await sb.from('orders').insert([orderData]);
 
             if (error) {
-                alert("Ошибка Supabase: " + error.message);
-                console.error("Supabase Error:", error);
+                alert(t('alertError') + error.message);
                 btn.disabled = false;
                 btn.innerHTML = originalBtnContent;
                 return;
             }
         }
 
-        console.log("Заказ успешно сохранен!");
         localStorage.setItem('lastOrderTime', Date.now().toString());
-        alert(currentLang === 'en' ? "Order successfully saved! Opening WhatsApp..." : "Заказ успешно сохранен! Переходим в WhatsApp...");
+        alert(t('alertOrderSuccess'));
 
         // 2. Prepare WhatsApp message
         let whatsappText = currentLang === 'en' ? "🍣 *New Mistorsush Order!* 🍣\n\n" : "🍣 *Новый заказ Mistorsush!* 🍣\n\n";
-        whatsappText += `*${i18n[currentLang].nameField}:* ${name}\n`;
-        whatsappText += `*${i18n[currentLang].phoneField}:* ${phone}\n`;
-        whatsappText += `*${i18n[currentLang].receiving}:* ${orderType === 'delivery' ? i18n[currentLang].delivery + ' 🚚' : i18n[currentLang].pickup + ' 🚶‍♂️'}\n`;
-        whatsappText += `*Время доставки:* ${deliveryTimeText}\n\n`;
+        whatsappText += `*${t('nameField')}:* ${name}\n`;
+        whatsappText += `*${t('phoneField')}:* ${phone}\n`;
+        whatsappText += `*${t('receiving')}:* ${orderType === 'delivery' ? t('delivery') + ' 🚚' : t('pickup') + ' 🚶‍♂️'}\n`;
+        whatsappText += `*${t('timingLab')}:* ${deliveryTimeText}\n\n`;
 
         if (orderType === 'delivery') {
-            whatsappText += `${i18n[currentLang].whatsappAddress} ${fullAddress}\n\n`;
+            whatsappText += `${t('whatsappAddress')} ${fullAddress}\n\n`;
         }
 
-        whatsappText += `${i18n[currentLang].whatsappOrderTitle}\n${orderItemsText}`;
+        whatsappText += `${t('whatsappOrderTitle')}\n${orderItemsText}`;
 
         if (discount > 0) {
-            whatsappText += `\n\n*${i18n[currentLang].discount2plus1}:* -${discount}₪`;
+            whatsappText += `\n\n*${t('discount2plus1')}:* -${discount}₪`;
         }
 
         if (deliveryCost > 0) {
-            whatsappText += `\n*${i18n[currentLang].deliveryCostLabel}:* ${deliveryCost}₪`;
+            whatsappText += `\n*${t('deliveryCostLabel')}:* ${deliveryCost}₪`;
         } else if (orderType === 'delivery') {
-            whatsappText += `\n*${i18n[currentLang].deliveryCostLabel}:* ${i18n[currentLang].freeDelivery}`;
+            whatsappText += `\n*${t('deliveryCostLabel')}:* ${t('freeDelivery')}`;
         }
 
-        whatsappText += `\n\n*${i18n[currentLang].totalToPay}: ${finalPrice}₪*`;
+        whatsappText += `\n\n*${t('totalToPay')} ${finalPrice}₪*`;
 
         if (comment) {
-            whatsappText += `\n\n*${i18n[currentLang].commentField}:* ${comment}`;
+            whatsappText += `\n\n*${t('commentField')}:* ${comment}`;
         }
 
         const whatsappUrl = `https://wa.me/972559284670?text=${encodeURIComponent(whatsappText)}`;
@@ -1363,8 +1600,7 @@ async function submitOrder() {
         btn.innerHTML = originalBtnContent;
 
     } catch (err) {
-        alert("Критическая ошибка кода: " + err.message);
-        console.error("Critical Error:", err);
+        alert(t('alertError') + err.message);
         btn.disabled = false;
         btn.innerHTML = originalBtnContent;
     }
@@ -1433,19 +1669,26 @@ function toggleAuthMode() {
     const toggleBtn = document.getElementById('authToggleBtn');
     
     if (authMode === 'login') {
-        title.textContent = currentLang === 'en' ? 'Login' : 'Вход в кабинет';
-        btnText.textContent = currentLang === 'en' ? 'Login' : 'Войти';
-        toggleBtn.textContent = currentLang === 'en' ? "Don't have an account? Register" : "Нет аккаунта? Зарегистрироваться";
+        title.textContent = t('authLoginTitle');
+        btnText.textContent = t('authLoginBtn');
+        toggleBtn.textContent = t('authNoAccount');
     } else {
-        title.textContent = currentLang === 'en' ? 'Registration' : 'Регистрация';
-        btnText.textContent = currentLang === 'en' ? 'Register' : 'Создать аккаунт';
-        toggleBtn.textContent = currentLang === 'en' ? "Already have an account? Login" : "Уже есть аккаунт? Войти";
+        title.textContent = t('authRegisterTitle');
+        btnText.textContent = t('authRegisterBtn');
+        toggleBtn.textContent = t('authHaveAccount');
     }
 }
 
 async function handleAuth(event) {
     event.preventDefault();
     if (!sb) return;
+    
+    clearAllErrors('authModal');
+    
+    const emailValid = validateField('authEmail', { req: true, email: true });
+    const passValid = validateField('authPassword', { req: true, minLen: 6 });
+    
+    if (!emailValid || !passValid) return;
     
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
@@ -1463,7 +1706,6 @@ async function handleAuth(event) {
             const { data, error } = await sb.auth.signUp({ email, password });
             if (error) throw error;
             
-            // Create user profile in 'profiles' table
             if (data.user) {
                 const { error: profileError } = await sb.from('profiles').insert([{
                     id: data.user.id,
@@ -1476,7 +1718,7 @@ async function handleAuth(event) {
                 if (profileError) console.error("Error creating profile:", profileError);
             }
 
-            alert(currentLang === 'en' ? "Registration successful! You can now login." : "Регистрация успешна! Теперь вы можете войти.");
+            alert(t('alertAuthSuccessRegister'));
             toggleAuthMode();
             btn.disabled = false;
             btn.textContent = originalText;
@@ -1484,7 +1726,7 @@ async function handleAuth(event) {
         }
         closeAuthModal();
     } catch (err) {
-        alert(err.message);
+        alert(t('alertError') + err.message);
     } finally {
         btn.disabled = false;
         btn.textContent = originalText;
@@ -1619,7 +1861,7 @@ async function loadProfileData() {
         if (document.getElementById('profileFloor')) document.getElementById('profileFloor').value = floor;
         if (document.getElementById('profileEntrance')) document.getElementById('profileEntrance').value = entrance;
         
-        document.getElementById('profileUserName').textContent = name || (currentLang === 'en' ? 'Unnamed Gourmet' : 'Инкогнито');
+        document.getElementById('profileUserName').textContent = name || t('profileUnnamed');
         
         // Also auto-fill checkout if empty
         if (name && document.getElementById('custName') && !document.getElementById('custName').value) {
@@ -1648,6 +1890,13 @@ async function loadProfileData() {
 async function saveProfile() {
     if (!sb || !currentUser) return;
     
+    clearAllErrors('profileModal');
+    
+    const nameValid = validateField('profileName', { req: true });
+    const phoneValid = validateField('profilePhone', { req: true, phone: true });
+    
+    if (!nameValid || !phoneValid) return;
+    
     const name = document.getElementById('profileName').value.trim();
     const phone = document.getElementById('profilePhone').value.trim();
     const address = document.getElementById('profileAddress').value.trim();
@@ -1668,64 +1917,53 @@ async function saveProfile() {
             .eq('id', currentUser.id);
             
         if (error) throw error;
-        alert(currentLang === 'en' ? "Profile updated!" : "Данные обновлены!");
+        alert(t('alertProfileUpdated'));
         await checkSession();
     } catch (err) {
-        alert(err.message);
+        alert(t('alertError') + err.message);
     }
 }
 
 async function changePassword() {
     if (!sb || !currentUser) return;
     
+    clearAllErrors('settingsModal');
+    
+    const oldValid = validateField('oldPassword', { req: true });
+    const newValid = validateField('newPassword', { req: true, minLen: 6 });
+    const confirmValid = validateField('confirmNewPassword', { req: true, match: 'newPassword' });
+    
+    if (!oldValid || !newValid || !confirmValid) return;
+    
     const oldPass = document.getElementById('oldPassword').value;
     const newPass = document.getElementById('newPassword').value;
-    const confirmPass = document.getElementById('confirmNewPassword').value;
-    
-    if (!oldPass || !newPass || !confirmPass) {
-        alert(currentLang === 'en' ? "All fields required" : "Заполните все поля");
-        return;
-    }
-    
-    if (newPass !== confirmPass) {
-        alert(currentLang === 'en' ? "Passwords don't match" : "Новые пароли не совпадают");
-        return;
-    }
-
-    if (newPass.length < 6) {
-        alert(currentLang === 'en' ? "Password too short" : "Пароль слишком короткий (мин. 6 симв.)");
-        return;
-    }
     
     const btn = document.getElementById('changePassBtn');
     btn.disabled = true;
     btn.innerText = '...';
     
     try {
-        // 1. Verify old password by re-authentication
         const { error: authError } = await sb.auth.signInWithPassword({
             email: currentUser.email,
             password: oldPass
         });
         
-        if (authError) throw new Error(currentLang === 'en' ? "Wrong old password" : "Неверный старый пароль");
+        if (authError) throw new Error(t('validationEmpty')); // Or better key if needed
         
-        // 2. Update to new password
         const { error: updateError } = await sb.auth.updateUser({
             password: newPass
         });
         
         if (updateError) throw updateError;
         
-        alert(currentLang === 'en' ? "Password successfully changed!" : "Пароль успешно изменен!");
-        
+        alert(t('alertPassChanged'));
         closeSettingsModal();
         
     } catch (err) {
-        alert(err.message);
+        alert(t('alertError') + err.message);
     } finally {
         btn.disabled = false;
-        btn.innerText = currentLang === 'en' ? 'Update Password' : 'Обновить пароль';
+        btn.innerText = t('settingsUpdateBtn');
     }
 }
 
@@ -1745,7 +1983,7 @@ async function loadUserOrders() {
         if (error) throw error;
         
         if (!data || data.length === 0) {
-            container.innerHTML = `<div class="text-center py-8 text-muted text-[10px] uppercase font-bold tracking-widest opacity-50 italic">${currentLang === 'en' ? 'No orders yet...' : 'Заказов пока нет...'}</div>`;
+            container.innerHTML = `<div class="text-center py-8 text-muted text-[10px] uppercase font-bold tracking-widest opacity-50 italic">${t('profileOrdersEmpty')}</div>`;
             return;
         }
         
@@ -1759,19 +1997,19 @@ async function loadUserOrders() {
             
             switch(order.status) {
                 case 'new':
-                    statusText = currentLang === 'en' ? 'New' : '🆕 Новый';
+                    statusText = t('statusNew');
                     statusColor = 'text-brand border-brand/20 bg-brand/5';
                     break;
                 case 'Готовится':
-                    statusText = currentLang === 'en' ? 'Cooking' : '🔥 Готовится';
+                    statusText = t('statusCooking');
                     statusColor = 'text-amber-500 border-amber-500/20 bg-amber-500/5';
                     break;
                 case 'Курьер в пути':
-                    statusText = currentLang === 'en' ? 'In Transit' : '🛵 В пути';
+                    statusText = t('statusTransit');
                     statusColor = 'text-blue-500 border-blue-500/20 bg-blue-500/5';
                     break;
                 case 'Завершен':
-                    statusText = currentLang === 'en' ? 'Completed' : '✅ Завершен';
+                    statusText = t('statusCompleted');
                     statusColor = 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5';
                     break;
                 default:
@@ -1799,7 +2037,7 @@ async function loadUserOrders() {
         }).join('');
         
     } catch (err) {
-        container.innerHTML = `<div class="text-center py-4 text-brand text-[8px] uppercase font-black tracking-widest">Error loading orders</div>`;
+        container.innerHTML = `<div class="text-center py-4 text-brand text-[8px] uppercase font-black tracking-widest">${t('alertError')} load orders</div>`;
         console.error(err);
     }
 }
