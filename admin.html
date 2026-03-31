@@ -141,7 +141,25 @@
 
         <!-- Dashboard View -->
         <div id="dashboard-view" class="space-y-12 animate-fade-in py-10">
-            <div class="text-center space-y-4 mb-16">
+            <!-- Site Status Toggle Section -->
+            <div class="max-w-4xl mx-auto mb-12 bg-card border border-white/5 p-6 md:p-8 rounded-[2rem] shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-[#25D366]/5 blur-[80px] rounded-full transition-all" id="status-bg-glow"></div>
+                <div class="flex items-center gap-5 relative z-10 w-full sm:w-auto">
+                    <div id="status-icon-container" class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-inner transition-colors duration-500 bg-[#25D366]/10 text-[#25D366] shrink-0">
+                        ✅
+                    </div>
+                    <div>
+                        <h3 class="text-xl md:text-2xl font-black text-white uppercase tracking-tight" id="status-title">Сайт работает</h3>
+                        <p id="status-text-desc" class="text-muted text-xs mt-1 font-medium leading-relaxed opacity-80">Принимает заказы в штатном режиме</p>
+                    </div>
+                </div>
+                
+                <button id="site-status-toggle" onclick="toggleSiteStatus()" class="relative w-20 h-10 rounded-full transition-colors duration-500 outline-none focus:ring-4 focus:ring-white/10 shrink-0 bg-[#25D366] shadow-lg self-end sm:self-auto">
+                    <div id="site-status-knob" class="absolute left-1 top-1 w-8 h-8 rounded-full bg-white shadow-md transform transition-transform duration-500 translate-x-10"></div>
+                </button>
+            </div>
+
+            <div class="text-center space-y-4 mb-16 relative z-10">
                 <h2 class="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic">
                     Панель <span class="text-brand">Управления</span>
                 </h2>
@@ -510,6 +528,7 @@
             }
 
             for (const cat in grouped) {
+                if (cat === 'system_config') continue;
                 if (!categoryOrder.includes(cat) && grouped[cat].length > 0) {
                     handleNav(cat, grouped[cat]);
                     listHtml += renderCategoryBlock(cat, grouped[cat]);
@@ -1080,6 +1099,9 @@
 
                 // Only show dashboard if no other view is currently visible
                 const currentVisibleView = ['products', 'orders', 'completed-orders'].find(v => !document.getElementById(v + '-view').classList.contains('hidden'));
+                
+                loadSiteStatus();
+
                 if (!currentVisibleView) {
                     showView('dashboard');
                 } else {
@@ -1159,6 +1181,106 @@
 
             closeDrawer();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        let isSiteActive = true;
+        let siteStatusId = null;
+
+        async function loadSiteStatus() {
+            const { data, error } = await sb.from('products').select('*').eq('name', 'system_site_status');
+            
+            if (error) {
+                console.error("Error fetching site status:", error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                // Not found, create it
+                const newProduct = {
+                    name: 'system_site_status',
+                    category: 'system_config',
+                    price: 0,
+                    is_available: true,
+                    description: 'Флаг работы сайта (true - включен, false - выключен)'
+                };
+                const { data: newData, error: insertError } = await sb.from('products').insert([newProduct]).select().single();
+                if (!insertError && newData) {
+                    isSiteActive = true;
+                    siteStatusId = newData.id;
+                    updateSiteStatusUI(isSiteActive);
+                }
+            } else {
+                // Found at least one
+                isSiteActive = data[0].is_available;
+                siteStatusId = data[0].id;
+                updateSiteStatusUI(isSiteActive);
+                
+                // Cleanup multiple entries if they were accidentally created by the old code
+                if (data.length > 1) {
+                    const idsToDelete = data.slice(1).map(p => p.id);
+                    await sb.from('products').delete().in('id', idsToDelete);
+                }
+            }
+        }
+
+        async function toggleSiteStatus() {
+            if (!siteStatusId) return;
+            const newStatus = !isSiteActive;
+            const btn = document.getElementById('site-status-toggle');
+            btn.style.opacity = '0.5';
+            btn.style.pointerEvents = 'none';
+
+            const { error } = await sb.from('products').update({ is_available: newStatus }).eq('id', siteStatusId);
+            
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+
+            if (error) {
+                alert('Ошибка при изменении статуса сайта: ' + error.message);
+            } else {
+                isSiteActive = newStatus;
+                updateSiteStatusUI(isSiteActive);
+            }
+        }
+
+        function updateSiteStatusUI(isActive) {
+            const btn = document.getElementById('site-status-toggle');
+            const knob = document.getElementById('site-status-knob');
+            const icon = document.getElementById('status-icon-container');
+            const title = document.getElementById('status-title');
+            const desc = document.getElementById('status-text-desc');
+            const glow = document.getElementById('status-bg-glow');
+
+            if (isActive) {
+                btn.classList.replace('bg-brand', 'bg-[#25D366]');
+                knob.classList.add('translate-x-10');
+                knob.classList.remove('translate-x-0');
+                
+                icon.classList.remove('bg-brand/10', 'text-brand');
+                icon.classList.add('bg-[#25D366]/10', 'text-[#25D366]');
+                icon.innerText = '✅';
+
+                title.innerText = 'Сайт работает';
+                desc.innerText = 'Принимает заказы в штатном режиме';
+                
+                glow.classList.remove('bg-brand/5');
+                glow.classList.remove('bg-brand/10');
+                glow.classList.add('bg-[#25D366]/5');
+            } else {
+                btn.classList.replace('bg-[#25D366]', 'bg-brand');
+                knob.classList.remove('translate-x-10');
+                knob.classList.add('translate-x-0');
+                
+                icon.classList.remove('bg-[#25D366]/10', 'text-[#25D366]');
+                icon.classList.add('bg-brand/10', 'text-brand');
+                icon.innerText = '🛑';
+
+                title.innerText = 'Сайт отключен';
+                desc.innerText = 'Заказы временно не принимаются';
+                
+                glow.classList.remove('bg-[#25D366]/5');
+                glow.classList.add('bg-brand/5');
+            }
         }
 
         // Realtime Subscription

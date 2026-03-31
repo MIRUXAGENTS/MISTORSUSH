@@ -376,6 +376,10 @@ async function init() {
         try {
             const { data, error } = await sb.from('products').select('*').order('id');
             if (!error && data && data.length > 0) {
+                const siteStatusProduct = data.find(p => p.name === 'system_site_status');
+                if (siteStatusProduct && siteStatusProduct.is_available === false) {
+                    showDisabledSiteModal();
+                }
                 transformSupabaseData(data);
             }
         } catch (e) {
@@ -1440,6 +1444,11 @@ async function submitOrder() {
         return;
     }
 
+    if (typeof isSiteDisabled !== 'undefined' && isSiteDisabled) {
+        alert("Заказы временно не принимаются. Попробуйте позже.");
+        return;
+    }
+
     const lastOrderTime = localStorage.getItem('lastOrderTime');
     if (lastOrderTime) {
         const diff = Date.now() - parseInt(lastOrderTime);
@@ -2213,3 +2222,52 @@ function speakText(text) {
 
 // Initialize on load
 initScreenReader();
+
+let isSiteDisabled = false;
+
+function showDisabledSiteModal() {
+    isSiteDisabled = true;
+    
+    // 1. Dim main content
+    const bodyChildren = document.body.children;
+    for (let i = 0; i < bodyChildren.length; i++) {
+        const el = bodyChildren[i];
+        if (el.tagName !== 'SCRIPT' && el.id !== 'disabledSiteModal' && !el.classList.contains('fixed-sys-modal')) {
+            el.style.opacity = '0.3';
+            el.style.pointerEvents = 'none';
+            el.style.filter = 'grayscale(0.5)';
+            el.style.transition = 'all 0.5s ease-in-out';
+        }
+    }
+
+    // 2. Insert modal
+    const modal = document.createElement('div');
+    modal.id = 'disabledSiteModal';
+    modal.className = 'fixed inset-0 z-[99999] flex items-center justify-center p-4 animate-fade-in bg-black/60 backdrop-blur-sm pointer-events-auto fixed-sys-modal';
+    
+    modal.innerHTML = `
+        <div class="bg-dark border border-amber-500/30 shadow-[0_0_80px_rgba(245,158,11,0.15)] w-full max-w-lg rounded-[2.5rem] p-8 md:p-10 text-center flex flex-col items-center relative overflow-hidden transform transition-transform scale-100">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 blur-[50px] rounded-full"></div>
+            <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-inner bg-amber-500/10 text-amber-500 border border-amber-500/20 relative z-10 animate-pulse">
+                ⏳
+            </div>
+            <h2 class="text-xl md:text-2xl font-black text-white uppercase tracking-tight leading-tight mb-4 relative z-10">
+                Готовим с любовью, но сейчас —<br><span class="text-amber-500">очень стараемся успеть!</span>
+            </h2>
+            <div class="w-16 h-1.5 bg-amber-500 rounded-full mb-6 relative z-10"></div>
+            <div class="space-y-4 text-white/80 font-medium leading-relaxed text-sm relative z-10">
+                <p>Друзья, мы получили очень много заказов и хотим, чтобы каждый из них был выполнен идеально. Чтобы не подвести вас и сохранить качество, мы временно приостановили прием новых чеков.</p>
+                <p>Пожалуйста, загляните к нам чуть позже — мы скоро разберемся с текущими заказами и снова будем в строю. Приносим извинения за неудобства!</p>
+            </div>
+            <div class="mt-8 pt-6 border-t border-white/10 w-full relative z-10">
+                <p class="text-[#25D366] text-[11px] sm:text-xs font-bold flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Ваш уже оформленный заказ в работе и будет доставлен вовремя
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+}
