@@ -2,7 +2,8 @@
 
 import { useCart } from '@/context/CartContext';
 import { useLang } from '@/context/LangContext';
-import { menuData, getItemName } from '@/lib/menuData';
+import { getItemName } from '@/lib/menuData';
+import { useMenu } from '@/context/MenuContext';
 
 interface CartModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface CartModalProps {
 export default function CartModal({ isOpen, onClose, onCheckout, isPromoActive }: CartModalProps) {
   const { cartItems, addToCart, removeFromCart, cartSubtotal } = useCart();
   const { lang, t } = useLang();
+  const { menuData } = useMenu();
 
   function calculateDiscount(): number {
     if (!isPromoActive) return 0;

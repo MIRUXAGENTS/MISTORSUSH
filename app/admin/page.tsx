@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { sb } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
-import { menuData, resolveImagePath } from '@/lib/menuData';
+import { menuCategories, resolveImagePath } from '@/lib/menuData';
 
 // --- Types ---
 interface Order {
@@ -22,8 +22,7 @@ interface Order {
 }
 
 interface SupabaseProduct {
-  id: number;
-  item_id: string;
+  id: any;
   name: string;
   name_en: string;
   price: number;
@@ -264,10 +263,12 @@ export default function AdminPage() {
     if (!selectedProduct) return;
     setSaveMessage('Сохраняем...');
     if (isNewProduct) {
-      const { error } = await sb.from('products').insert([selectedProduct]);
+      const { id, ingredients, ingredients_en, name_en, ...insertPayload } = selectedProduct;
+      const { error } = await sb.from('products').insert([insertPayload]);
       if (error) { setSaveMessage('Ошибка: ' + error.message); return; }
     } else {
-      const { error } = await sb.from('products').update(selectedProduct).eq('id', selectedProduct.id);
+      const { id, ingredients, ingredients_en, name_en, ...updatePayload } = selectedProduct;
+      const { error } = await sb.from('products').update(updatePayload).eq('id', selectedProduct.id);
       if (error) { setSaveMessage('Ошибка: ' + error.message); return; }
     }
     setSaveMessage('Сохранено!');
@@ -308,14 +309,13 @@ export default function AdminPage() {
     setIsNewProduct(true);
     setSelectedProduct({
       id: 0,
-      item_id: '',
       name: '',
       name_en: '',
       price: 0,
       ingredients: '',
       ingredients_en: '',
       is_available: true,
-      category: menuData[0]?.slug || '',
+      category: menuCategories[0]?.slug || '',
     });
   }
 
@@ -671,8 +671,8 @@ export default function AdminPage() {
 
             {/* PRODUCTS TAB */}
             {activeTab === 'products' && (() => {
-              // Map slug → human-readable name (from menuData)
-              const slugToName: Record<string, string> = Object.fromEntries(menuData.map(c => [c.slug, c.category]));
+              // Map slug → human-readable name (from menuCategories)
+              const slugToName: Record<string, string> = Object.fromEntries(menuCategories.map(c => [c.slug, c.category]));
               const slugToEmoji: Record<string, string> = {
                 'classic_rolls': '🍣', 'baked_rolls': '🔥', 'unusual_rolls': '✨',
                 'burgers': '🍔', 'gunkan': '🥢', 'drinks': '🥤',
@@ -771,7 +771,7 @@ export default function AdminPage() {
                                    onChange={e => setSelectedProduct({ ...selectedProduct, category: e.target.value })}
                                    className="w-full bg-transparent border-none outline-none font-black text-white text-[11px] uppercase tracking-widest cursor-pointer p-0"
                                  >
-                                   {menuData.map(m => (
+                                   {menuCategories.map(m => (
                                      <option key={m.slug} value={m.slug} className="bg-card text-white">{m.category}</option>
                                    ))}
                                  </select>
@@ -929,7 +929,7 @@ export default function AdminPage() {
                                           onFocus={() => { if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); } }}
                                           className="w-full bg-transparent border-none outline-none font-black text-white text-[11px] uppercase tracking-widest cursor-pointer p-0"
                                         >
-                                          {menuData.map(m => (
+                                          {menuCategories.map(m => (
                                             <option key={m.slug} value={m.slug} className="bg-card text-white">{m.category}</option>
                                           ))}
                                         </select>

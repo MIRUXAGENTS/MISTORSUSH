@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useCallback, useReducer } from 'react';
-import { menuData, MenuItem } from '@/lib/menuData';
+import { MenuItem } from '@/lib/menuData';
+import { useMenu } from '@/context/MenuContext';
 
 export interface CartItem {
   item: MenuItem;
@@ -41,14 +42,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   }
 }
 
-function getItem(id: string): MenuItem | null {
-  for (const cat of menuData) {
-    const found = cat.items.find((i) => i.id === id);
-    if (found) return found;
-  }
-  return null;
-}
-
 interface CartContextValue {
   cart: Cart;
   addToCart: (id: string) => void;
@@ -64,12 +57,21 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { cart: {} });
+  const { menuData } = useMenu();
+
+  const getItem = useCallback((id: string): MenuItem | null => {
+    for (const cat of menuData) {
+      const found = cat.items.find((i) => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  }, [menuData]);
 
   const addToCart = useCallback((id: string) => {
     const item = getItem(id);
     if (item && item.is_available === false) return;
     dispatch({ type: 'ADD', id });
-  }, []);
+  }, [getItem]);
 
   const removeFromCart = useCallback((id: string) => {
     dispatch({ type: 'REMOVE', id });
@@ -82,10 +84,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const cartItems: CartItem[] = Object.entries(state.cart)
     .filter(([, count]) => count > 0)
     .map(([id, count]) => {
-      const item = getItem(id)!;
+      const item = getItem(id);
       return { item, count };
     })
-    .filter((ci) => ci.item != null);
+    .filter((ci): ci is { item: MenuItem; count: number } => ci.item != null);
 
   const cartCount = cartItems.reduce((a, ci) => a + ci.count, 0);
   const cartSubtotal = cartItems.reduce((a, ci) => a + ci.item.price * ci.count, 0);

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { LangProvider } from '@/context/LangContext';
+import { MenuProvider } from '@/context/MenuContext';
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -31,9 +32,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className="scroll-smooth">
       <body className={`${inter.variable} bg-dark text-white antialiased pb-28`}>
         <LangProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
+          <MenuProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </MenuProvider>
         </LangProvider>
       </body>
     </html>

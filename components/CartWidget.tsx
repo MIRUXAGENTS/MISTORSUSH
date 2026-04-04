@@ -2,7 +2,7 @@
 
 import { useCart } from '@/context/CartContext';
 import { useLang } from '@/context/LangContext';
-import { menuData } from '@/lib/menuData';
+import { useMenu } from '@/context/MenuContext';
 
 interface CartWidgetProps {
   onOpen: () => void;
@@ -12,6 +12,7 @@ interface CartWidgetProps {
 export default function CartWidget({ onOpen, isPromoActive }: CartWidgetProps) {
   const { cartCount, cartSubtotal, cart } = useCart();
   const { t } = useLang();
+  const { menuData } = useMenu();
 
   function calculateDiscount(): number {
     if (!isPromoActive) return 0;

@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useLang } from '@/context/LangContext';
-import { menuData, getItemName } from '@/lib/menuData';
+import { getItemName } from '@/lib/menuData';
+import { useMenu } from '@/context/MenuContext';
 import { sb } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 
@@ -18,6 +19,7 @@ interface CheckoutModalProps {
 export default function CheckoutModal({ isOpen, onClose, onBack, isPromoActive, currentUser }: CheckoutModalProps) {
   const { cartItems, cartSubtotal, cart, clearCart } = useCart();
   const { lang, t } = useLang();
+  const { menuData } = useMenu();
 
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const [orderTiming, setOrderTiming] = useState<'asap' | 'scheduled'>('asap');

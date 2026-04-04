@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLang } from '@/context/LangContext';
-import { menuData as staticMenuData, MenuItem, MenuCategory } from '@/lib/menuData';
+import { MenuItem, MenuCategory } from '@/lib/menuData';
+import { useMenu } from '@/context/MenuContext';
 import { verifyPromoDay } from '@/lib/promoUtils';
 import { sb } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
@@ -35,7 +36,6 @@ export default function Home() {
   const { lang, t } = useLang();
 
   // State
-  const [menuData, setMenuData] = useState<MenuCategory[]>(staticMenuData);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isPromoActive, setIsPromoActive] = useState(false);
   const [isSiteDisabled, setIsSiteDisabled] = useState(false);
@@ -59,62 +59,13 @@ export default function Home() {
   // Lightbox
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
+  const { menuData, loading } = useMenu();
+
   // Dynamic header height
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(320);
 
-  // Fetch live menu from Supabase
-  useEffect(() => {
-    async function fetchLiveMenu() {
-      const { data, error } = await sb.from('products').select('*').neq('category', 'system_config');
-      if (error || !data) return;
 
-      const liveCategories: MenuCategory[] = staticMenuData.map(cat => ({
-        ...cat,
-        items: [...cat.items] // Copy static items first
-      }));
-
-      data.forEach(p => {
-        // Find category or create if new
-        let catObj = liveCategories.find(c => c.slug === p.category);
-        if (!catObj) {
-          catObj = { category: p.category, categoryEn: p.category, slug: p.category, items: [] };
-          liveCategories.push(catObj);
-        }
-
-        const staticItem = staticMenuData.find(c => c.slug === p.category)?.items.find(i => i.id === p.item_id);
-        const existingIndex = catObj.items.findIndex(i => i.id === p.item_id);
-
-        const mappedItem = {
-          id: p.item_id,
-          name: p.name,
-          nameEn: p.name_en,
-          price: p.price,
-          ingredients: p.ingredients,
-          ingredientsEn: p.ingredients_en,
-          image: p.image_url || staticItem?.image,
-          is_available: p.is_available
-        };
-
-        if (existingIndex !== -1) {
-          // If the item exists in static, overwrite it with DB data, or remove if unavailable
-          if (p.is_available) {
-            catObj.items[existingIndex] = mappedItem;
-          } else {
-            catObj.items.splice(existingIndex, 1);
-          }
-        } else {
-          // If it's a completely new DB item, add it
-          if (p.is_available) {
-            catObj.items.push(mappedItem);
-          }
-        }
-      });
-
-      setMenuData(liveCategories.filter(c => c.items.length > 0));
-    }
-    fetchLiveMenu();
-  }, []);
 
   // Initial load
   useEffect(() => {
