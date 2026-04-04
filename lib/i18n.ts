@@ -3,7 +3,7 @@ export const i18n = {
     subtitle: 'Суши в Ашкелоне',
     workingHours: 'Работаем по предварительным заказам',
     openEveryday: 'Open Everyday 12:00 - 23:00',
-    promoTitle: 'Акция Пятницы!',
+    promoTitle: 'Акции',
     promoDesc: 'Все запеченные роллы',
     cartEmpty: 'Ваша корзина пуста :(',
     cartEmptySub: 'Добавьте роллы, чтобы сделать заказ',
@@ -103,12 +103,15 @@ export const i18n = {
     alertError: 'Ошибка: ',
     confirmDelete: 'Вы уверены?',
     itemsLabel: 'позиций',
+    footerBrandDesc: 'Доставка суши в Ашкелоне. Только свежие ингредиенты.',
+    footerAllRights: 'Все права защищены.',
+    footerMadeBy: 'Сделано в '
   },
   en: {
     subtitle: 'Sushi in Ashkelon',
     workingHours: 'Pre-orders only',
     openEveryday: 'Open Everyday 12:00 - 23:00',
-    promoTitle: 'Friday Promo!',
+    promoTitle: 'Promotions',
     promoDesc: 'All baked rolls',
     cartEmpty: 'Your cart is empty :(',
     cartEmptySub: 'Add rolls to place an order',
@@ -208,12 +211,15 @@ export const i18n = {
     alertError: 'Error: ',
     confirmDelete: 'Are you sure?',
     itemsLabel: 'items',
+    footerBrandDesc: 'Sushi delivery in Ashkelon. Only fresh ingredients.',
+    footerAllRights: 'All rights reserved.',
+    footerMadeBy: 'Made by '
   },
   he: {
     subtitle: 'סושי באשקלון',
     workingHours: 'עובדים על פי הזמנות מראש',
     openEveryday: 'פתוח כל יום 12:00 - 23:00',
-    promoTitle: 'מבצע שישי!',
+    promoTitle: 'מבצעים',
     promoDesc: 'כל הרולים האפויים',
     cartEmpty: 'העגלה שלך ריקה :(',
     cartEmptySub: 'הוסף רולים כדי לבצע הזמנה',
@@ -313,6 +319,9 @@ export const i18n = {
     alertError: 'שגיאה: ',
     confirmDelete: 'האם אתה בטוח?',
     itemsLabel: 'פריטים',
+    footerBrandDesc: 'משלוחי סושי באשקלון. רכיבים טריים בלבד.',
+    footerAllRights: 'כל הזכויות שמורות.',
+    footerMadeBy: 'נוצר על ידי '
   },
 } as const;
 
