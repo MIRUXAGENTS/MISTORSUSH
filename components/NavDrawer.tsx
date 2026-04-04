@@ -50,7 +50,7 @@ export default function NavDrawer({
         {/* Header */}
         <div className="p-5 border-b border-white/10 flex justify-between items-center bg-card">
           <div className="flex items-center gap-3">
-            <Image src="/img/mistorsush_logo.png" alt="Logo" width={40} height={40} className="rounded-full border border-white/10" />
+            <Image src="/img/mistorsush_logo.webp" alt="Logo" width={40} height={40} className="rounded-full border border-white/10" />
             <h2 className="text-sm font-black tracking-[0.2em] text-white uppercase flex flex-col leading-tight">
               MISTOR<span className="text-brand">SUSH</span>
             </h2>

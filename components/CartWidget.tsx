@@ -42,7 +42,7 @@ export default function CartWidget({ onOpen, isPromoActive }: CartWidgetProps) {
       }`}
     >
       <div
-        className="glass-cart rounded-2xl flex justify-between items-center p-4 float-bottom-safe cursor-pointer active:scale-95 transition-transform"
+        className="glass-cart rounded-2xl flex justify-between items-center p-4 cursor-pointer active:scale-95 transition-transform"
         onClick={onOpen}
       >
         <div className="flex flex-col">

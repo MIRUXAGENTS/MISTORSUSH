@@ -15,6 +15,7 @@ import MenuSection from '@/components/MenuSection';
 import CartWidget from '@/components/CartWidget';
 import NavDrawer from '@/components/NavDrawer';
 import ScrollTopButton from '@/components/ScrollTopButton';
+import Footer from '@/components/Footer';
 
 // Modals
 import CartModal from '@/components/modals/CartModal';
@@ -23,6 +24,8 @@ import CheckoutModal from '@/components/modals/CheckoutModal';
 import AuthModal from '@/components/modals/AuthModal';
 import ProfileModal from '@/components/modals/ProfileModal';
 import AccessibilityModal from '@/components/modals/AccessibilityModal';
+import AboutModal from '@/components/modals/AboutModal';
+import PromotionsModal from '@/components/modals/PromotionsModal';
 const ImageLightbox = dynamic(() => import('@/components/modals/ImageLightbox'), { ssr: false });
 
 import { useCart } from '@/context/CartContext';
@@ -46,6 +49,8 @@ export default function Home() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isPromosOpen, setIsPromosOpen] = useState(false);
 
   // Upsell state
   const [upsellSuggestions, setUpsellSuggestions] = useState<MenuItem[]>([]);
@@ -183,7 +188,7 @@ export default function Home() {
 
   return (
     <>
-      <div ref={headerRef} className="fixed top-0 left-0 w-full z-50 bg-dark/95 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20">
+      <div ref={headerRef} className="absolute sm:fixed top-0 left-0 w-full z-50 bg-dark/95 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20">
         <Header
           onOpenDrawer={() => setIsDrawerOpen(true)}
           onOpenCart={() => setIsCartOpen(true)}
@@ -198,7 +203,7 @@ export default function Home() {
         />
       </div>
 
-      <main style={{ paddingTop: headerHeight + 12 }} className="px-4 sm:px-8 pb-24 w-full space-y-12">
+      <main style={{ paddingTop: headerHeight + 12 }} className="px-4 sm:px-8 pb-24 w-full space-y-12 sm:pt-0">
         {searchQuery && (
           <div className="mb-8 text-white/80 font-medium">
             {t('searchResults')} "{searchQuery}": {filteredMenuData.reduce((acc, cat) => acc + cat.items.length, 0)} {lang === 'en' ? 'items found' : 'найдено'}
@@ -336,6 +341,19 @@ export default function Home() {
       <AccessibilityModal
         isOpen={isAccessibilityOpen}
         onClose={() => setIsAccessibilityOpen(false)}
+      />
+      <AboutModal
+        isOpen={isAboutOpen}
+        onClose={() => setIsAboutOpen(false)}
+      />
+      <PromotionsModal
+        isOpen={isPromosOpen}
+        onClose={() => setIsPromosOpen(false)}
+        isPromoActive={isPromoActive}
+      />
+      <Footer 
+        onAboutClick={() => setIsAboutOpen(true)} 
+        onPromosClick={() => setIsPromosOpen(true)}
       />
     </>
   );

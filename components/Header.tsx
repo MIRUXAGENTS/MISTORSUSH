@@ -22,7 +22,7 @@ export default function Header({ onOpenDrawer, onOpenCart, onOpenAuth, isLoggedI
         <div className="relative z-10 flex items-center shrink-0">
           <button onClick={onOpenDrawer} className="relative group active:scale-95 transition-transform duration-200">
             <Image
-              src="/img/mistorsush_logo.png"
+              src="/img/mistorsush_logo.webp"
               alt="Mistorsush Logo"
               width={64}
               height={64}

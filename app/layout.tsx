@@ -19,7 +19,10 @@ export const metadata: Metadata = {
     url: 'https://iceblinkil.github.io/MISTORSUSH/',
     title: 'Mistorsush | Доставка суши в Ашкелоне',
     description: 'Лучшие запеченные роллы в городе. Заказывай прямо сейчас через удобный сайт!',
-    images: [{ url: 'https://iceblinkil.github.io/MISTORSUSH/img/mistorsush_logo.png' }],
+    images: [{ url: 'https://iceblinkil.github.io/MISTORSUSH/img/mistorsush_logo.webp' }],
+  },
+  icons: {
+    icon: '/img/mistorsush_favicon.svg',
   },
 };
 
