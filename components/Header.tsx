@@ -77,12 +77,10 @@ export default function Header({ onOpenDrawer, onOpenCart, onOpenAuth, isLoggedI
         <p className="text-[11px] font-bold tracking-widest text-muted uppercase text-center">
           {t('subtitle')}
         </p>
-        <h2 className="text-xs font-semibold text-white/95 text-center uppercase tracking-wide">
-          {t('workingHours')}
-        </h2>
-        <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-full text-brand mt-2">
-          <span className="text-[10px] font-black tracking-widest uppercase">
-            {lang === 'he' ? t('openEveryday') : t('openEveryday').replace('Open Everyday ', '')}
+        <div className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 mt-2 shadow-[0_0_20px_rgba(16,185,129,0.05)]">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[10px] font-black tracking-[0.2em] uppercase">
+            {lang === 'ru' ? 'работаем каждый день 12:00 — 23:00' : lang === 'he' ? 'פתוחים כל יום 12:00 — 23:00' : 'Open daily 12:00 — 23:00'}
           </span>
         </div>
       </div>
