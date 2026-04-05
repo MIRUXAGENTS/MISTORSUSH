@@ -91,14 +91,14 @@ export default function AccessibilityModal({ isOpen, onClose }: AccessibilityMod
   if (!isOpen) return null;
 
   const modes: { id: AccessMode; icon: string; label: string }[] = [
-    { id: 'stop-animations', icon: '🚫', label: lang === 'ru' ? 'Без анимаций' : 'Stop Animations' },
-    { id: 'monochrome', icon: '⚫', label: lang === 'ru' ? 'Монохром' : 'Monochrome' },
-    { id: 'contrast', icon: '🌓', label: lang === 'ru' ? 'Контраст' : 'Contrast' },
-    { id: 'invert', icon: '🔄', label: lang === 'ru' ? 'Инверсия' : 'Invert' },
-    { id: 'readable-font', icon: 'Aa', label: lang === 'ru' ? 'Шрифт Arial' : 'Readable Font' },
-    { id: 'highlight-links', icon: '🔗', label: lang === 'ru' ? 'Ссылки' : 'Highlight Links' },
-    { id: 'sepia', icon: '📜', label: lang === 'ru' ? 'Сепия' : 'Sepia' },
-    { id: 'screen-reader', icon: '🔊', label: lang === 'ru' ? 'Чтение вслух' : 'Screen Reader' },
+    { id: 'stop-animations', icon: '🚫', label: lang === 'ru' ? 'Без анимаций' : lang === 'he' ? 'עצור אנימציות' : 'Stop Animations' },
+    { id: 'monochrome', icon: '⚫', label: lang === 'ru' ? 'Монохром' : lang === 'he' ? 'מונוכרום' : 'Monochrome' },
+    { id: 'contrast', icon: '🌓', label: lang === 'ru' ? 'Контраст' : lang === 'he' ? 'ניגודיות' : 'Contrast' },
+    { id: 'invert', icon: '🔄', label: lang === 'ru' ? 'Инверсия' : lang === 'he' ? 'היפוך צבעים' : 'Invert' },
+    { id: 'readable-font', icon: 'Aa', label: lang === 'ru' ? 'Шрифт Arial' : lang === 'he' ? 'גופן קריא' : 'Readable Font' },
+    { id: 'highlight-links', icon: '🔗', label: lang === 'ru' ? 'Ссылки' : lang === 'he' ? 'הדגש קישורים' : 'Highlight Links' },
+    { id: 'sepia', icon: '📜', label: lang === 'ru' ? 'Сепия' : lang === 'he' ? 'ספייה' : 'Sepia' },
+    { id: 'screen-reader', icon: '🔊', label: lang === 'ru' ? 'Чтение вслух' : lang === 'he' ? 'קורא מסך' : 'Screen Reader' },
   ];
 
   return (
@@ -115,7 +115,7 @@ export default function AccessibilityModal({ isOpen, onClose }: AccessibilityMod
               </svg>
             </div>
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-800">
-              {lang === 'ru' ? 'Доступность' : 'Accessibility'}
+              {lang === 'ru' ? 'Доступность' : lang === 'he' ? 'נגישות' : 'Accessibility'}
             </h3>
           </div>
           <button onClick={onClose} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
@@ -155,7 +155,7 @@ export default function AccessibilityModal({ isOpen, onClose }: AccessibilityMod
             {/* Font Size Control */}
             <div className="bg-white p-3 rounded-2xl flex flex-col items-center gap-2 border-2 border-transparent">
               <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                {lang === 'ru' ? 'Шрифт' : 'Font Size'}
+                {lang === 'ru' ? 'Шрифт' : lang === 'he' ? 'גודל גופן' : 'Font Size'}
               </span>
               <div className="flex gap-1 w-full">
                 <button onClick={() => adjustFontSize(-0.1)} className="flex-grow py-3 bg-gray-50 rounded-xl hover:bg-gray-100 text-gray-700 font-black transition">-</button>
@@ -171,7 +171,7 @@ export default function AccessibilityModal({ isOpen, onClose }: AccessibilityMod
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
-            {lang === 'ru' ? 'Сбросить всё' : 'Reset All'}
+            {lang === 'ru' ? 'Сбросить всё' : lang === 'he' ? 'אפס הכל' : 'Reset All'}
           </button>
         </div>
       </div>
