@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { sb } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { menuCategories, resolveImagePath } from '@/lib/menuData';
+import imageCompression from 'browser-image-compression';
 
 // --- Types ---
 interface Order {
@@ -282,22 +283,32 @@ export default function AdminPage() {
 
   async function handleImageUpload(file: File, productToUpdate: SupabaseProduct) {
     setIsUploading(true);
-    setSaveMessage('Загрузка...');
+    setSaveMessage('Сжатие (WebP)...');
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('category', productToUpdate.category);
+      const options = {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+        fileType: 'image/webp',
+      };
+      const compressedFile = await imageCompression(file, options);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      setSaveMessage('Загрузка в Supabase...');
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.webp`;
+      const filePath = `${productToUpdate.category}/${fileName}`;
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const { data, error } = await sb.storage
+        .from('product-images')
+        .upload(filePath, compressedFile, { cacheControl: '3600', upsert: false });
 
-      setSelectedProduct(prev => prev ? { ...prev, image_url: data.path } : null);
-      setSaveMessage('Фото выбрано!');
+      if (error) throw error;
+
+      const { data: publicData } = sb.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      setSelectedProduct(prev => prev ? { ...prev, image_url: publicData.publicUrl } : null);
+      setSaveMessage('Фото загружено!');
     } catch (err: any) {
       console.error(err);
       setSaveMessage('Ошибка: ' + err.message);

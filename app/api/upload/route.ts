@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
     
     // Set target directory
     const uploadDir = category 
-      ? path.join(process.cwd(), 'public', 'img', 'products', category)
-      : path.join(process.cwd(), 'public', 'img', 'products');
+      ? path.join(process.cwd(), 'public', 'img', category)
+      : path.join(process.cwd(), 'public', 'img');
 
     // Create dir if doesn't exist
     if (!fs.existsSync(uploadDir)) {
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
     fs.writeFileSync(filePath, buffer);
 
     const publicPath = category 
-      ? `/img/products/${category}/${cleanFileName}`
-      : `/img/products/${cleanFileName}`;
+      ? `/img/${category}/${cleanFileName}`
+      : `/img/${cleanFileName}`;
 
     return NextResponse.json({ path: publicPath });
   } catch (error: any) {

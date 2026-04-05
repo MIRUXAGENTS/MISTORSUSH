@@ -114,18 +114,13 @@ export function resolveImagePath(image: string | undefined | null, categorySlug:
     processed = '/' + processed;
   }
 
-  // Auto-fix: if it starts with /img/ but not /img/products/, insert it
-  if (processed.startsWith('/img/') && !processed.startsWith('/img/products/')) {
-    processed = processed.replace('/img/', '/img/products/');
-  }
-
   // If it's already a full path or URL, return as is
   if (processed.startsWith('/') || processed.startsWith('http')) {
     return processed;
   }
   
   // Otherwise, assume it's just a filename in the standard category folder
-  return `/img/products/${categorySlug}/${processed}`;
+  return `/img/${categorySlug}/${processed}`;
 }
 
 /** Helper: resolve image path specifically for a MenuItem */
