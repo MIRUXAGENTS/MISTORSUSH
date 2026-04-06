@@ -119,7 +119,7 @@ export default function Footer({ onAboutClick, onPromosClick }: FooterProps) {
           <div className="text-muted text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
             <span className="opacity-60">{t('footerMadeBy')}</span>
             <a 
-              href="https://mirux.io" 
+              href="https://mirux.vercel.app/" 
               className="text-white hover:text-brand transition-all duration-300 font-black relative group px-1"
             >
               MIRUX
