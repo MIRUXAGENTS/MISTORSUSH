@@ -6,6 +6,8 @@ import { User } from '@supabase/supabase-js';
 import { menuCategories, resolveImagePath } from '@/lib/menuData';
 import imageCompression from 'browser-image-compression';
 import ScrollTopButton from '@/components/ScrollTopButton';
+import { isAdmin } from '@/lib/authUtils';
+import { useRouter } from 'next/navigation';
 
 // --- Types ---
 interface Order {
@@ -52,12 +54,9 @@ function getStatusStyle(status: string): string {
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -82,15 +81,33 @@ export default function AdminPage() {
   const [archiveFilter, setArchiveFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('all');
   const [adminProductCat, setAdminProductCat] = useState<string>('');
 
-  const ADMIN_EMAILS = ['mistorsush@gmail.com', 'vladislav.chistov1337@gmail.com', 'admin@mistorsush.com'];
-
   useEffect(() => {
     sb.auth.getSession().then(({ data: { session } }) => {
       const user = session?.user || null;
       setCurrentUser(user);
-      if (user && ADMIN_EMAILS.includes(user.email || '')) setIsAuthorized(true);
+      if (user && isAdmin(user.email)) {
+        setIsAuthorized(true);
+      } else {
+        router.replace('/');
+      }
     });
-  }, []);
+
+    const { data: authListener } = sb.auth.onAuthStateChange(
+      (event, session) => {
+        const user = session?.user || null;
+        setCurrentUser(user);
+        if (user && isAdmin(user.email)) {
+          setIsAuthorized(true);
+        } else {
+          router.replace('/');
+        }
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [router]);
 
   useEffect(() => {
     if (isAuthorized) {
@@ -99,28 +116,6 @@ export default function AdminPage() {
       loadSiteStatus();
     }
   }, [isAuthorized]);
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setAuthError('');
-    setAuthLoading(true);
-    try {
-      const { data, error } = await sb.auth.signInWithPassword({ email: authEmail, password: authPassword });
-      if (error) throw error;
-      const user = data.user;
-      if (user && ADMIN_EMAILS.includes(user.email || '')) {
-        setCurrentUser(user);
-        setIsAuthorized(true);
-      } else {
-        await sb.auth.signOut();
-        setAuthError('Доступ запрещен. Нет прав администратора.');
-      }
-    } catch (err: unknown) {
-      setAuthError((err as Error).message || 'Ошибка авторизации');
-    } finally {
-      setAuthLoading(false);
-    }
-  }
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -234,10 +229,10 @@ export default function AdminPage() {
 
     // Period filter
     if (archiveFilter === 'all') return true;
-    
+
     const orderDate = new Date(order.created_at);
     const now = new Date();
-    
+
     switch (archiveFilter) {
       case 'today':
         return orderDate.toDateString() === now.toDateString();
@@ -285,7 +280,7 @@ export default function AdminPage() {
 
   async function deleteProductAdmin(product: SupabaseProduct) {
     if (!confirm(`Удалить товар "${product.name}"? Это действие нельзя отменить.`)) return;
-    
+
     // Cleanup image from bucket if exists
     if (product.image_url && product.image_url.includes('/product-images/')) {
       const urlParts = product.image_url.split('/product-images/');
@@ -336,10 +331,10 @@ export default function AdminPage() {
       if (productToUpdate.image_url && productToUpdate.image_url.includes('/product-images/')) {
         const urlParts = productToUpdate.image_url.split('/product-images/');
         if (urlParts.length === 2 && urlParts[1]) {
-           const { error: rmError } = await sb.storage.from('product-images').remove([urlParts[1]]);
-           if (rmError) {
-             console.error("Не удалось удалить старое фото (возможно, нет прав DELETE в Supabase):", rmError);
-           }
+          const { error: rmError } = await sb.storage.from('product-images').remove([urlParts[1]]);
+          if (rmError) {
+            console.error("Не удалось удалить старое фото (возможно, нет прав DELETE в Supabase):", rmError);
+          }
         }
       }
 
@@ -374,42 +369,19 @@ export default function AdminPage() {
     return new Date(dateStr).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 
-  // Auth screen
-  if (!isAuthorized) {
+  // Global loading overlay if authorization is null
+  if (isAuthorized === null) {
     return (
-      <div className="min-h-screen bg-dark flex items-center justify-center p-4">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -right-20 -top-20 w-80 h-80 bg-brand/10 blur-[100px] rounded-full animate-pulse" />
-          <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-brand/5 blur-[100px] rounded-full animate-pulse" />
-        </div>
-        <div className="w-full max-w-md bg-card border border-white/5 p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative z-10">
-          <div className="text-center mb-10">
-            <div className="w-20 h-20 bg-brand/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-4xl border border-brand/20">🍣</div>
-            <h1 className="text-2xl font-black tracking-tight text-white uppercase italic">
-              MISTOR<span className="text-brand">SUSH</span>
-            </h1>
-            <p className="text-muted text-[10px] font-black uppercase tracking-[0.3em] mt-2 opacity-60">Admin Security Layer</p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-1.5">
-              <label className="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Email</label>
-              <input type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} required placeholder="admin@example.com"
-                className="w-full bg-dark/50 border border-white/5 rounded-xl px-5 py-4 text-sm focus:border-brand/50 outline-none transition-all placeholder:text-white/5 text-white font-medium" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[10px] uppercase font-black tracking-widest text-muted ml-1">Пароль</label>
-              <input type="password" value={authPassword} onChange={e => setAuthPassword(e.target.value)} required placeholder="••••••••"
-                className="w-full bg-dark/50 border border-white/5 rounded-xl px-5 py-4 text-sm focus:border-brand/50 outline-none transition-all placeholder:text-white/5 text-white font-medium" />
-            </div>
-            {authError && <p className="text-brand text-xs font-bold text-center">{authError}</p>}
-            <button type="submit" disabled={authLoading}
-              className="w-full py-4 bg-white text-dark font-black rounded-xl hover:bg-brand hover:text-white transition-all active:scale-[0.98] shadow-xl uppercase text-xs tracking-[0.2em] disabled:opacity-60">
-              {authLoading ? '...' : 'Войти в панель'}
-            </button>
-          </form>
-        </div>
+      <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 border-4 border-brand/20 border-t-brand rounded-full animate-spin mb-4" />
+        <p className="text-muted text-xs font-black uppercase tracking-widest animate-pulse">Проверка доступа...</p>
       </div>
     );
+  }
+
+  // Not authorized fallback (while redirecting)
+  if (!isAuthorized) {
+    return null;
   }
 
   // Admin dashboard
@@ -417,7 +389,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-dark">
       {/* Top bar */}
       <div className="bg-card border-b border-white/10 px-4 sm:px-8 py-4 flex justify-between items-center sticky top-0 z-50 backdrop-blur-xl">
-        <div 
+        <div
           onClick={() => setActiveTab('dashboard')}
           className="flex items-center gap-3 cursor-pointer group active:scale-95 transition-all"
         >
@@ -429,12 +401,16 @@ export default function AdminPage() {
             <div className="w-4 h-0.5 bg-brand rounded-full transition-all group-hover:w-full"></div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button onClick={() => router.push('/')}
+            className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-brand border border-brand/20 px-3 py-2 rounded-xl hover:bg-brand hover:text-white transition-all shadow-lg shadow-brand/10">
+            На сайт
+          </button>
           <button onClick={loadOrders} className="text-[10px] font-black uppercase tracking-widest text-muted hover:text-white transition-colors border border-white/10 px-3 py-2 rounded-xl hover:bg-white/5 md:flex hidden">
             🔄 Обновить
           </button>
           <button onClick={() => sb.auth.signOut().then(() => setIsAuthorized(false))}
-            className="text-[10px] font-black uppercase tracking-widest text-muted hover:text-brand transition-colors border border-white/10 px-3 py-2 rounded-xl hover:bg-brand/5">
+            className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted hover:text-brand transition-colors border border-white/10 px-3 py-2 rounded-xl hover:bg-brand/5">
             Выйти
           </button>
         </div>
@@ -445,17 +421,14 @@ export default function AdminPage() {
         {activeTab === 'dashboard' && (
           <div className="px-4 sm:px-0 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Site Status Section */}
-            <div className={`relative overflow-hidden p-8 rounded-[2.5rem] border transition-all duration-700 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-8 group ${
-              isSiteActive ? 'bg-card border-white/5' : 'bg-brand/5 border-brand/20'
-            }`}>
-              <div className={`absolute -right-16 -top-16 w-64 h-64 blur-[100px] rounded-full transition-all duration-700 ${
-                isSiteActive ? 'bg-emerald-500/10' : 'bg-brand/10'
-              }`} />
-              
+            <div className={`relative overflow-hidden p-8 rounded-[2.5rem] border transition-all duration-700 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-8 group ${isSiteActive ? 'bg-card border-white/5' : 'bg-brand/5 border-brand/20'
+              }`}>
+              <div className={`absolute -right-16 -top-16 w-64 h-64 blur-[100px] rounded-full transition-all duration-700 ${isSiteActive ? 'bg-emerald-500/10' : 'bg-brand/10'
+                }`} />
+
               <div className="flex items-center gap-6 relative z-10 w-full sm:w-auto">
-                <div className={`w-16 h-16 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-inner transition-all duration-700 ${
-                  isSiteActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-brand/10 text-brand'
-                }`}>
+                <div className={`w-16 h-16 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-inner transition-all duration-700 ${isSiteActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-brand/10 text-brand'
+                  }`}>
                   {isSiteActive ? '✅' : '🛑'}
                 </div>
                 <div>
@@ -467,17 +440,15 @@ export default function AdminPage() {
                   </p>
                 </div>
               </div>
-              
-              <button 
+
+              <button
                 onClick={toggleSiteStatus}
                 disabled={statusLoading}
-                className={`relative w-24 h-12 rounded-full transition-all duration-700 outline-none focus:ring-4 focus:ring-white/10 shrink-0 shadow-2xl active:scale-95 ${
-                  isSiteActive ? 'bg-emerald-500' : 'bg-brand'
-                }`}
+                className={`relative w-24 h-12 rounded-full transition-all duration-700 outline-none focus:ring-4 focus:ring-white/10 shrink-0 shadow-2xl active:scale-95 ${isSiteActive ? 'bg-emerald-500' : 'bg-brand'
+                  }`}
               >
-                <div className={`absolute left-1.5 top-1.5 w-9 h-9 rounded-full bg-white shadow-xl transform transition-transform duration-500 flex items-center justify-center ${
-                  isSiteActive ? 'translate-x-12' : 'translate-x-0'
-                }`}>
+                <div className={`absolute left-1.5 top-1.5 w-9 h-9 rounded-full bg-white shadow-xl transform transition-transform duration-500 flex items-center justify-center ${isSiteActive ? 'translate-x-12' : 'translate-x-0'
+                  }`}>
                   {statusLoading && (
                     <div className={`w-5 h-5 border-2 border-t-transparent rounded-full animate-spin ${isSiteActive ? 'border-emerald-500' : 'border-brand'}`} />
                   )}
@@ -530,7 +501,7 @@ export default function AdminPage() {
         {activeTab !== 'dashboard' && (
           <div className="animate-in fade-in duration-500 px-4 sm:px-0">
             <div className="mb-6 flex items-center justify-between">
-              <button 
+              <button
                 onClick={() => setActiveTab('dashboard')}
                 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted hover:text-brand transition-colors group"
               >
@@ -539,13 +510,12 @@ export default function AdminPage() {
                 </svg>
                 Назад к панели
               </button>
-              
+
               <div className="flex gap-1">
                 {(['orders', 'products', 'archive'] as ActiveTab[]).map(tab => (
                   <button key={tab} onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
-                      activeTab === tab ? 'bg-brand text-white border-brand shadow-lg shadow-brand/20' : 'bg-transparent text-muted border-transparent hover:bg-white/5'
-                    }`}>
+                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${activeTab === tab ? 'bg-brand text-white border-brand shadow-lg shadow-brand/20' : 'bg-transparent text-muted border-transparent hover:bg-white/5'
+                      }`}>
                     {tab === 'orders' ? 'Новые' : tab === 'products' ? 'Товары' : 'Архив'}
                   </button>
                 ))}
@@ -554,22 +524,19 @@ export default function AdminPage() {
 
             {/* Mini Site Status Banner */}
             <div className="mb-8">
-              <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-all ${
-                isSiteActive ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-500' : 'bg-brand/5 border-brand/20 text-brand'
-              }`}>
+              <div className={`p-4 rounded-2xl border flex items-center justify-between gap-4 transition-all ${isSiteActive ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-500' : 'bg-brand/5 border-brand/20 text-brand'
+                }`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${
-                    isSiteActive ? 'bg-emerald-500/20' : 'bg-brand/20'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${isSiteActive ? 'bg-emerald-500/20' : 'bg-brand/20'
+                    }`}>
                     {isSiteActive ? '✅' : '🛑'}
                   </div>
                   <span className="text-xs font-black uppercase tracking-widest text-white/90">
                     {isSiteActive ? 'Сайт работает' : 'Сайт отключен'}
                   </span>
                 </div>
-                <button onClick={toggleSiteStatus} disabled={statusLoading} className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all ${
-                  isSiteActive ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-brand text-white border-brand'
-                }`}>
+                <button onClick={toggleSiteStatus} disabled={statusLoading} className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all ${isSiteActive ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-brand text-white border-brand'
+                  }`}>
                   {statusLoading ? '...' : 'Переключить'}
                 </button>
               </div>
@@ -579,7 +546,7 @@ export default function AdminPage() {
             {activeTab === 'orders' && (
               <div className="space-y-6">
                 <div className="relative w-full max-w-sm mb-6">
-                  <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Поиск заказов..." 
+                  <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Поиск заказов..."
                     className="w-full bg-card border border-white/10 rounded-xl px-10 py-3 text-xs text-white placeholder-white/20 outline-none focus:border-brand/40 transition-all shadow-inner" />
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/20">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -613,51 +580,50 @@ export default function AdminPage() {
 
                           {isExpanded && (
                             <div className="mt-4 pt-4 border-t border-white/5 space-y-4 animate-fade-in">
-                               {(order.delivery_address || order.comment) && (
-                                 <div className="space-y-2">
-                                   {order.delivery_address && (
-                                     <div className="text-xs text-white/70">
-                                       <span className="text-[9px] uppercase font-black text-brand/50 block mb-0.5">Адрес</span>
-                                       {order.delivery_address}
-                                     </div>
-                                   )}
-                                   {order.comment && (
-                                     <div className="text-xs text-white/70 italic bg-white/5 p-2 rounded-lg border border-white/5">
-                                       “{order.comment}”
-                                     </div>
-                                   )}
-                                 </div>
-                               )}
+                              {(order.delivery_address || order.comment) && (
+                                <div className="space-y-2">
+                                  {order.delivery_address && (
+                                    <div className="text-xs text-white/70">
+                                      <span className="text-[9px] uppercase font-black text-brand/50 block mb-0.5">Адрес</span>
+                                      {order.delivery_address}
+                                    </div>
+                                  )}
+                                  {order.comment && (
+                                    <div className="text-xs text-white/70 italic bg-white/5 p-2 rounded-lg border border-white/5">
+                                      “{order.comment}”
+                                    </div>
+                                  )}
+                                </div>
+                              )}
 
-                               <div className="space-y-1">
-                                 <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Состав</div>
-                                 <pre className="text-white text-[11px] whitespace-pre-wrap bg-dark/50 rounded-xl p-3 border border-white/5 font-mono leading-relaxed">
-                                   {order.items_json?.order_items || ''}
-                                 </pre>
-                               </div>
+                              <div className="space-y-1">
+                                <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Состав</div>
+                                <pre className="text-white text-[11px] whitespace-pre-wrap bg-dark/50 rounded-xl p-3 border border-white/5 font-mono leading-relaxed">
+                                  {order.items_json?.order_items || ''}
+                                </pre>
+                              </div>
 
-                               <div className="lg:hidden space-y-2">
-                                 <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Статус</div>
-                                 <div className="grid grid-cols-2 gap-2">
-                                   {STATUS_OPTIONS.map(status => (
-                                     <button key={status} onClick={(e) => { e.stopPropagation(); updateOrderStatus(order.id, status); }}
-                                       className={`py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
-                                         order.status === status ? getStatusStyle(status) : 'border-white/10 text-muted'
-                                       }`}>
-                                       {status}
-                                     </button>
-                                   ))}
-                                 </div>
-                                 <button 
-                                   onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
-                                   className="w-full mt-2 py-2 flex items-center justify-center gap-2 bg-brand/10 border border-brand/20 text-brand rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand hover:text-white transition-all active:scale-95"
-                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                    </svg>
-                                    Удалить заказ
-                                 </button>
-                               </div>
+                              <div className="lg:hidden space-y-2">
+                                <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Статус</div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {STATUS_OPTIONS.map(status => (
+                                    <button key={status} onClick={(e) => { e.stopPropagation(); updateOrderStatus(order.id, status); }}
+                                      className={`py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${order.status === status ? getStatusStyle(status) : 'border-white/10 text-muted'
+                                        }`}>
+                                      {status}
+                                    </button>
+                                  ))}
+                                </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
+                                  className="w-full mt-2 py-2 flex items-center justify-center gap-2 bg-brand/10 border border-brand/20 text-brand rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand hover:text-white transition-all active:scale-95"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                  </svg>
+                                  Удалить заказ
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -670,7 +636,7 @@ export default function AdminPage() {
                       <div className="bg-card border border-white/10 rounded-2xl p-6 space-y-5 sticky top-24 overflow-y-auto max-h-[75vh] custom-scrollbar">
                         <div className="flex justify-between items-center">
                           <h3 className="font-black uppercase tracking-widest text-sm">Заказ #{selectedOrder.id}</h3>
-                          <button 
+                          <button
                             onClick={() => deleteOrder(selectedOrder.id)}
                             className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 text-brand flex items-center justify-center hover:bg-brand hover:text-white transition-all active:scale-90"
                             title="Удалить заказ"
@@ -701,9 +667,8 @@ export default function AdminPage() {
                           <div className="grid grid-cols-2 gap-2">
                             {STATUS_OPTIONS.map(status => (
                               <button key={status} onClick={() => updateOrderStatus(selectedOrder.id, status)}
-                                className={`py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${
-                                  selectedOrder.status === status ? getStatusStyle(status) : 'border-white/10 text-muted'
-                                }`}>
+                                className={`py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${selectedOrder.status === status ? getStatusStyle(status) : 'border-white/10 text-muted'
+                                  }`}>
                                 {status}
                               </button>
                             ))}
@@ -712,7 +677,7 @@ export default function AdminPage() {
                       </div>
                     ) : (
                       <div className="flex items-center justify-center h-64 text-muted opacity-40">
-                         <p className="text-[10px] uppercase font-black tracking-widest">Выберите заказ</p>
+                        <p className="text-[10px] uppercase font-black tracking-widest">Выберите заказ</p>
                       </div>
                     )}
                   </div>
@@ -778,111 +743,111 @@ export default function AdminPage() {
                   {/* NEW PRODUCT FORM */}
                   {isNewProduct && selectedProduct && (
                     <div className="bg-brand/5 border-2 border-brand/30 rounded-[3rem] p-8 space-y-8 animate-fade-in relative overflow-hidden">
-                       <div className="absolute -right-20 -top-20 w-80 h-80 bg-brand/10 blur-[100px] rounded-full" />
-                       
-                       <div className="flex justify-between items-center relative z-10">
-                         <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Новый Товар</h2>
-                         <button onClick={() => { setIsNewProduct(false); setSelectedProduct(null); }} className="text-muted hover:text-white transition-colors">
-                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-6 h-6">
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                           </svg>
-                         </button>
-                       </div>
+                      <div className="absolute -right-20 -top-20 w-80 h-80 bg-brand/10 blur-[100px] rounded-full" />
 
-                       <div className="space-y-6 relative z-10">
-                          <div className="grid md:grid-cols-2 gap-6">
-                             <div className="col-span-1 md:col-span-2 space-y-4">
-                               <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
-                                 <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Название (RU / EN / HE)</label>
-                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                   <input type="text" value={selectedProduct.name} onChange={e => setSelectedProduct({ ...selectedProduct, name: e.target.value })} placeholder="Название (RU)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-sm pb-1" />
-                                   <input type="text" value={selectedProduct.name_en || ''} onChange={e => setSelectedProduct({ ...selectedProduct, name_en: e.target.value })} placeholder="Название (EN)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-sm pb-1" />
-                                   <input type="text" value={selectedProduct.name_he || ''} onChange={e => setSelectedProduct({ ...selectedProduct, name_he: e.target.value })} placeholder="Название (HE)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-sm pb-1" dir="rtl" />
-                                 </div>
-                               </div>
+                      <div className="flex justify-between items-center relative z-10">
+                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Новый Товар</h2>
+                        <button onClick={() => { setIsNewProduct(false); setSelectedProduct(null); }} className="text-muted hover:text-white transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
 
-                               <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
-                                 <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Ингредиенты (RU / EN / HE)</label>
-                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                   <textarea value={selectedProduct.ingredients || ''} onChange={e => setSelectedProduct({ ...selectedProduct, ingredients: e.target.value })} placeholder="Ингредиенты (RU)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-xs pb-1 min-h-[40px] resize-y" />
-                                   <textarea value={selectedProduct.ingredients_en || ''} onChange={e => setSelectedProduct({ ...selectedProduct, ingredients_en: e.target.value })} placeholder="Ингредиенты (EN)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-xs pb-1 min-h-[40px] resize-y" />
-                                   <textarea value={selectedProduct.ingredients_he || ''} onChange={e => setSelectedProduct({ ...selectedProduct, ingredients_he: e.target.value })} placeholder="Ингредиенты (HE)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-xs pb-1 min-h-[40px] resize-y" dir="rtl" />
-                                 </div>
-                               </div>
-                             </div>
+                      <div className="space-y-6 relative z-10">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="col-span-1 md:col-span-2 space-y-4">
+                            <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
+                              <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Название (RU / EN / HE)</label>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <input type="text" value={selectedProduct.name} onChange={e => setSelectedProduct({ ...selectedProduct, name: e.target.value })} placeholder="Название (RU)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-sm pb-1" />
+                                <input type="text" value={selectedProduct.name_en || ''} onChange={e => setSelectedProduct({ ...selectedProduct, name_en: e.target.value })} placeholder="Название (EN)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-sm pb-1" />
+                                <input type="text" value={selectedProduct.name_he || ''} onChange={e => setSelectedProduct({ ...selectedProduct, name_he: e.target.value })} placeholder="Название (HE)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-sm pb-1" dir="rtl" />
+                              </div>
+                            </div>
 
-                             <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
-                               <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Цена</label>
-                               <div className="flex items-center gap-2">
-                                 <input type="number"
-                                   value={selectedProduct.price}
-                                   onChange={e => setSelectedProduct({ ...selectedProduct, price: Number(e.target.value) })}
-                                   className="w-full bg-transparent border-none outline-none font-black text-brand text-2xl"
-                                 />
-                                 <span className="text-white/20 font-black text-xl italic uppercase">₪</span>
-                               </div>
-                             </div>
-
-                             <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
-                               <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Категория</label>
-                               <div className="flex items-center gap-2">
-                                 <span className="text-xl shrink-0 opacity-60">{displayEmoji(selectedProduct.category)}</span>
-                                 <select 
-                                   value={selectedProduct.category}
-                                   onChange={e => setSelectedProduct({ ...selectedProduct, category: e.target.value })}
-                                   className="w-full bg-transparent border-none outline-none font-black text-white text-[11px] uppercase tracking-widest cursor-pointer p-0"
-                                 >
-                                   {menuCategories.map(m => (
-                                     <option key={m.slug} value={m.slug} className="bg-card text-white">{m.category}</option>
-                                   ))}
-                                 </select>
-                               </div>
-                             </div>
-
-                             {/* Upload for New Product */}
-                             <div className="col-span-1 md:col-span-2 bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all cursor-pointer relative"
-                                onClick={() => document.getElementById('upload-input-new')?.click()}>
-                                <label className="text-[9px] font-black uppercase tracking-widest text-muted/40 flex justify-between">
-                                  Загрузить фото
-                                  {isUploading && <span className="text-brand animate-pulse">Загрузка...</span>}
-                                </label>
-                                
-                                <div className="flex items-center gap-4 min-w-0">
-                                  <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/5 flex items-center justify-center text-muted overflow-hidden shrink-0 shadow-lg transition-all group-hover:border-brand/30">
-                                    {(selectedProduct.image_url) ? (
-                                      <img src={resolveImagePath(selectedProduct.image_url, selectedProduct.category) || ''} alt="" className="w-full h-full object-cover" />
-                                    ) : (
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 opacity-30">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                                      </svg>
-                                    )}
-                                  </div>
-                                  <div className="flex-1 overflow-hidden min-w-0">
-                                     <div className="text-[12px] text-white/40 truncate font-mono italic block w-full">
-                                       {resolveImagePath(selectedProduct.image_url, selectedProduct.category) || 'Нажмите для выбора файла...'}
-                                     </div>
-                                  </div>
-                                </div>
-
-                                <input 
-                                  type="file" 
-                                  id="upload-input-new"
-                                  className="hidden" 
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleImageUpload(file, selectedProduct!);
-                                    e.target.value = '';
-                                  }}
-                                />
-                             </div>
+                            <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
+                              <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Ингредиенты (RU / EN / HE)</label>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <textarea value={selectedProduct.ingredients || ''} onChange={e => setSelectedProduct({ ...selectedProduct, ingredients: e.target.value })} placeholder="Ингредиенты (RU)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-xs pb-1 min-h-[40px] resize-y" />
+                                <textarea value={selectedProduct.ingredients_en || ''} onChange={e => setSelectedProduct({ ...selectedProduct, ingredients_en: e.target.value })} placeholder="Ингредиенты (EN)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-xs pb-1 min-h-[40px] resize-y" />
+                                <textarea value={selectedProduct.ingredients_he || ''} onChange={e => setSelectedProduct({ ...selectedProduct, ingredients_he: e.target.value })} placeholder="Ингредиенты (HE)" className="w-full bg-transparent border-b border-white/10 outline-none text-white text-xs pb-1 min-h-[40px] resize-y" dir="rtl" />
+                              </div>
+                            </div>
                           </div>
 
-                          <button onClick={saveProduct} disabled={!selectedProduct.name}
-                            className="w-full py-5 bg-white text-dark font-black rounded-2xl flex items-center justify-center gap-3 transition-all hover:bg-brand hover:text-white shadow-2xl active:scale-95 disabled:opacity-30 uppercase text-xs tracking-[0.3em]">
-                            Создать и Опубликовать
-                          </button>
-                       </div>
+                          <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Цена</label>
+                            <div className="flex items-center gap-2">
+                              <input type="number"
+                                value={selectedProduct.price}
+                                onChange={e => setSelectedProduct({ ...selectedProduct, price: Number(e.target.value) })}
+                                className="w-full bg-transparent border-none outline-none font-black text-brand text-2xl"
+                              />
+                              <span className="text-white/20 font-black text-xl italic uppercase">₪</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Категория</label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl shrink-0 opacity-60">{displayEmoji(selectedProduct.category)}</span>
+                              <select
+                                value={selectedProduct.category}
+                                onChange={e => setSelectedProduct({ ...selectedProduct, category: e.target.value })}
+                                className="w-full bg-transparent border-none outline-none font-black text-white text-[11px] uppercase tracking-widest cursor-pointer p-0"
+                              >
+                                {menuCategories.map(m => (
+                                  <option key={m.slug} value={m.slug} className="bg-card text-white">{m.category}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Upload for New Product */}
+                          <div className="col-span-1 md:col-span-2 bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all cursor-pointer relative"
+                            onClick={() => document.getElementById('upload-input-new')?.click()}>
+                            <label className="text-[9px] font-black uppercase tracking-widest text-muted/40 flex justify-between">
+                              Загрузить фото
+                              {isUploading && <span className="text-brand animate-pulse">Загрузка...</span>}
+                            </label>
+
+                            <div className="flex items-center gap-4 min-w-0">
+                              <div className="w-16 h-16 rounded-3xl bg-white/5 border border-white/5 flex items-center justify-center text-muted overflow-hidden shrink-0 shadow-lg transition-all group-hover:border-brand/30">
+                                {(selectedProduct.image_url) ? (
+                                  <img src={resolveImagePath(selectedProduct.image_url, selectedProduct.category) || ''} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 opacity-30">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex-1 overflow-hidden min-w-0">
+                                <div className="text-[12px] text-white/40 truncate font-mono italic block w-full">
+                                  {resolveImagePath(selectedProduct.image_url, selectedProduct.category) || 'Нажмите для выбора файла...'}
+                                </div>
+                              </div>
+                            </div>
+
+                            <input
+                              type="file"
+                              id="upload-input-new"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file, selectedProduct!);
+                                e.target.value = '';
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <button onClick={saveProduct} disabled={!selectedProduct.name}
+                          className="w-full py-5 bg-white text-dark font-black rounded-2xl flex items-center justify-center gap-3 transition-all hover:bg-brand hover:text-white shadow-2xl active:scale-95 disabled:opacity-30 uppercase text-xs tracking-[0.3em]">
+                          Создать и Опубликовать
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -915,9 +880,8 @@ export default function AdminPage() {
                             return (
                               <div key={product.id} className="bg-card border border-white/5 rounded-[2rem] overflow-hidden hover:border-white/10 transition-all shadow-2xl relative group">
                                 {/* Top background glow */}
-                                <div className={`absolute -right-16 -top-16 w-48 h-48 blur-[80px] rounded-full transition-all opacity-20 pointer-events-none group-hover:opacity-30 ${
-                                  product.is_available ? 'bg-emerald-500/30' : 'bg-brand/30'
-                                }`} />
+                                <div className={`absolute -right-16 -top-16 w-48 h-48 blur-[80px] rounded-full transition-all opacity-20 pointer-events-none group-hover:opacity-30 ${product.is_available ? 'bg-emerald-500/30' : 'bg-brand/30'
+                                  }`} />
 
                                 <div className="p-6 relative z-10 space-y-5">
                                   {/* Header: Buttons first for Top on Mobile, Right on Desktop */}
@@ -961,11 +925,10 @@ export default function AdminPage() {
                                       )}
                                       <button
                                         onClick={() => toggleProductAvailability(product)}
-                                        className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xl active:scale-90 transition-all shrink-0 ${
-                                          product.is_available
+                                        className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xl active:scale-90 transition-all shrink-0 ${product.is_available
                                             ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20'
                                             : 'bg-brand/10 border border-brand/20 text-brand hover:bg-brand/20'
-                                        }`}
+                                          }`}
                                       >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                                           {product.is_available ? (
@@ -1038,83 +1001,83 @@ export default function AdminPage() {
                                   {isEditing && (
                                     <div className="grid grid-cols-1 gap-4 animate-in fade-in slide-in-from-top-4 duration-300 border-t border-white/5 pt-5 mt-5">
                                       <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
-                                      <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Цена</label>
-                                      <div className="flex items-center gap-2">
-                                        <input type="number"
-                                          value={currentProduct?.price ?? 0}
-                                          onChange={e => {
-                                            if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); }
-                                            setSelectedProduct(prev => prev ? { ...prev, price: Number(e.target.value) } : null);
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Цена</label>
+                                        <div className="flex items-center gap-2">
+                                          <input type="number"
+                                            value={currentProduct?.price ?? 0}
+                                            onChange={e => {
+                                              if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); }
+                                              setSelectedProduct(prev => prev ? { ...prev, price: Number(e.target.value) } : null);
+                                            }}
+                                            onFocus={() => { if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); } }}
+                                            className="w-full bg-transparent border-none outline-none font-black text-brand text-2xl p-0 focus:text-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                          />
+                                          <span className="text-white/20 font-black text-xl italic uppercase">₪</span>
+                                        </div>
+                                      </div>
+
+                                      <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Категория</label>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xl shrink-0 opacity-60">{displayEmoji(currentProduct?.category || '')}</span>
+                                          <select
+                                            value={currentProduct?.category || ''}
+                                            onChange={e => {
+                                              if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); }
+                                              setSelectedProduct(prev => prev ? { ...prev, category: e.target.value } : null);
+                                            }}
+                                            onFocus={() => { if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); } }}
+                                            className="w-full bg-transparent border-none outline-none font-black text-white text-[11px] uppercase tracking-widest cursor-pointer p-0"
+                                          >
+                                            {menuCategories.map(m => (
+                                              <option key={m.slug} value={m.slug} className="bg-card text-white">{m.category}</option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                      </div>
+
+                                      <div className="col-span-2 bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all cursor-pointer relative"
+                                        onClick={() => document.getElementById(`upload-input-${product.id}`)?.click()}>
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-muted/40 flex justify-between">
+                                          Загрузить фото
+                                          {isUploading && <span className="text-brand animate-pulse">Загрузка...</span>}
+                                        </label>
+
+                                        <div className="flex items-center gap-4 min-w-0">
+                                          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-muted overflow-hidden shrink-0 shadow-lg transition-all group-hover:border-brand/30">
+                                            {(currentProduct?.image_url) ? (
+                                              <img src={resolveImagePath(currentProduct.image_url, product.category) || ''} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 opacity-30">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                              </svg>
+                                            )}
+                                          </div>
+                                          <div className="flex-1 overflow-hidden min-w-0">
+                                            <div className="text-[11px] text-white/40 truncate font-mono italic block w-full">
+                                              {resolveImagePath(currentProduct?.image_url, product.category) || 'Нажмите для выбора файла...'}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <input
+                                          type="file"
+                                          id={`upload-input-${product.id}`}
+                                          className="hidden"
+                                          accept="image/*"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleImageUpload(file, isEditing ? selectedProduct! : product);
+                                            e.target.value = '';
                                           }}
-                                          onFocus={() => { if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); } }}
-                                          className="w-full bg-transparent border-none outline-none font-black text-brand text-2xl p-0 focus:text-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         />
-                                        <span className="text-white/20 font-black text-xl italic uppercase">₪</span>
+                                        {isEditing && saveMessage && (
+                                          <div className="absolute right-4 bottom-4 px-3 py-1 bg-brand/10 rounded-full border border-brand/20">
+                                            <span className="text-brand text-[8px] font-black uppercase">{saveMessage}</span>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
-
-                                    <div className="bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all">
-                                      <label className="text-[9px] font-black uppercase tracking-widest text-muted/40">Категория</label>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xl shrink-0 opacity-60">{displayEmoji(currentProduct?.category || '')}</span>
-                                        <select 
-                                          value={currentProduct?.category || ''}
-                                          onChange={e => {
-                                            if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); }
-                                            setSelectedProduct(prev => prev ? { ...prev, category: e.target.value } : null);
-                                          }}
-                                          onFocus={() => { if (!isEditing) { setSelectedProduct(product); setIsNewProduct(false); } }}
-                                          className="w-full bg-transparent border-none outline-none font-black text-white text-[11px] uppercase tracking-widest cursor-pointer p-0"
-                                        >
-                                          {menuCategories.map(m => (
-                                            <option key={m.slug} value={m.slug} className="bg-card text-white">{m.category}</option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    </div>
-
-                                    <div className="col-span-2 bg-dark/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-1.5 focus-within:border-brand/40 transition-all cursor-pointer relative"
-                                      onClick={() => document.getElementById(`upload-input-${product.id}`)?.click()}>
-                                      <label className="text-[9px] font-black uppercase tracking-widest text-muted/40 flex justify-between">
-                                        Загрузить фото
-                                        {isUploading && <span className="text-brand animate-pulse">Загрузка...</span>}
-                                      </label>
-                                      
-                                      <div className="flex items-center gap-4 min-w-0">
-                                        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-muted overflow-hidden shrink-0 shadow-lg transition-all group-hover:border-brand/30">
-                                          {(currentProduct?.image_url) ? (
-                                            <img src={resolveImagePath(currentProduct.image_url, product.category) || ''} alt="" className="w-full h-full object-cover" />
-                                          ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 opacity-30">
-                                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                                            </svg>
-                                          )}
-                                        </div>
-                                        <div className="flex-1 overflow-hidden min-w-0">
-                                           <div className="text-[11px] text-white/40 truncate font-mono italic block w-full">
-                                             {resolveImagePath(currentProduct?.image_url, product.category) || 'Нажмите для выбора файла...'}
-                                           </div>
-                                        </div>
-                                      </div>
-
-                                      <input 
-                                        type="file" 
-                                        id={`upload-input-${product.id}`}
-                                        className="hidden" 
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                          const file = e.target.files?.[0];
-                                          if (file) handleImageUpload(file, isEditing ? selectedProduct! : product);
-                                          e.target.value = '';
-                                        }}
-                                      />
-                                      {isEditing && saveMessage && (
-                                        <div className="absolute right-4 bottom-4 px-3 py-1 bg-brand/10 rounded-full border border-brand/20">
-                                          <span className="text-brand text-[8px] font-black uppercase">{saveMessage}</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
                                   )}
                                 </div>
                               </div>
@@ -1134,16 +1097,15 @@ export default function AdminPage() {
             {activeTab === 'archive' && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                   <h2 className="font-black uppercase tracking-widest text-sm">Архив ({filteredArchive.length})</h2>
-                   <div className="flex gap-2">
+                  <h2 className="font-black uppercase tracking-widest text-sm">Архив ({filteredArchive.length})</h2>
+                  <div className="flex gap-2">
                     {(['today', 'week', 'month', 'all'] as const).map(p => (
-                      <button key={p} onClick={() => setArchiveFilter(p)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
-                        archiveFilter === p ? 'bg-white/10 text-white' : 'text-muted'
-                      }`}>
+                      <button key={p} onClick={() => setArchiveFilter(p)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${archiveFilter === p ? 'bg-white/10 text-white' : 'text-muted'
+                        }`}>
                         {p}
                       </button>
                     ))}
-                   </div>
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {filteredArchive.map(order => {
@@ -1159,7 +1121,7 @@ export default function AdminPage() {
                           <div className="flex items-center gap-4">
                             <div className="font-black text-emerald-400">{order.total_sum}₪</div>
                             {!isExpanded && (
-                              <button 
+                              <button
                                 onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
                                 className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/20 text-brand flex items-center justify-center hover:bg-brand hover:text-white transition-all active:scale-90 opacity-0 group-hover:opacity-100"
                                 title="Удалить из архива"
@@ -1174,57 +1136,57 @@ export default function AdminPage() {
 
                         {isExpanded && (
                           <div className="mt-4 pt-4 border-t border-white/5 space-y-4 animate-fade-in">
-                             <div className="grid grid-cols-2 gap-4">
-                               <div className="space-y-1">
-                                 <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Телефон</div>
-                                 <div className="text-white text-xs">{order.customer_phone}</div>
-                               </div>
-                               <div className="space-y-1">
-                                 <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Тип</div>
-                                 <div className="text-white text-xs">{order.order_type}</div>
-                               </div>
-                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Телефон</div>
+                                <div className="text-white text-xs">{order.customer_phone}</div>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Тип</div>
+                                <div className="text-white text-xs">{order.order_type}</div>
+                              </div>
+                            </div>
 
-                             {(order.delivery_address || order.comment) && (
-                               <div className="space-y-2">
-                                 {order.delivery_address && (
-                                   <div className="text-xs text-white/70">
-                                     <span className="text-[9px] uppercase font-black text-brand/50 block mb-0.5">Адрес</span>
-                                     {order.delivery_address}
-                                   </div>
-                                 )}
-                                 {order.comment && (
-                                   <div className="text-xs text-white/70 italic bg-white/5 p-2 rounded-lg border border-white/5">
-                                      “{order.comment}”
-                                   </div>
-                                 )}
-                               </div>
-                             )}
+                            {(order.delivery_address || order.comment) && (
+                              <div className="space-y-2">
+                                {order.delivery_address && (
+                                  <div className="text-xs text-white/70">
+                                    <span className="text-[9px] uppercase font-black text-brand/50 block mb-0.5">Адрес</span>
+                                    {order.delivery_address}
+                                  </div>
+                                )}
+                                {order.comment && (
+                                  <div className="text-xs text-white/70 italic bg-white/5 p-2 rounded-lg border border-white/5">
+                                    “{order.comment}”
+                                  </div>
+                                )}
+                              </div>
+                            )}
 
-                             <div className="space-y-1">
-                               <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Состав</div>
-                               <pre className="text-white text-[11px] whitespace-pre-wrap bg-dark/50 rounded-xl p-3 border border-white/5 font-mono leading-relaxed">
-                                 {order.items_json?.order_items || ''}
-                               </pre>
-                             </div>
+                            <div className="space-y-1">
+                              <div className="text-[9px] uppercase font-black tracking-widest text-brand/50">Состав</div>
+                              <pre className="text-white text-[11px] whitespace-pre-wrap bg-dark/50 rounded-xl p-3 border border-white/5 font-mono leading-relaxed">
+                                {order.items_json?.order_items || ''}
+                              </pre>
+                            </div>
 
-                             <div className="flex gap-2">
-                               <button 
-                                 onClick={(e) => { e.stopPropagation(); restoreOrder(order); }}
-                                 className="flex-1 py-3 flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
-                               >
-                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                                  </svg>
-                                  Вернуть в заказы
-                               </button>
-                               <button 
-                                 onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
-                                 className="py-3 px-4 flex items-center justify-center gap-2 bg-brand/5 border border-brand/20 text-brand rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand hover:text-white transition-all active:scale-95"
-                               >
-                                  Удалить
-                               </button>
-                             </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); restoreOrder(order); }}
+                                className="flex-1 py-3 flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                                </svg>
+                                Вернуть в заказы
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); deleteOrder(order.id); }}
+                                className="py-3 px-4 flex items-center justify-center gap-2 bg-brand/5 border border-brand/20 text-brand rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand hover:text-white transition-all active:scale-95"
+                              >
+                                Удалить
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>

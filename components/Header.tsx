@@ -3,15 +3,18 @@
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useLang } from '@/context/LangContext';
+import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   onOpenDrawer: () => void;
   onOpenCart: () => void;
   onOpenAuth: () => void;
   isLoggedIn: boolean;
+  isAdmin?: boolean;
 }
 
-export default function Header({ onOpenDrawer, onOpenCart, onOpenAuth, isLoggedIn }: HeaderProps) {
+export default function Header({ onOpenDrawer, onOpenCart, onOpenAuth, isLoggedIn, isAdmin }: HeaderProps) {
+  const router = useRouter();
   const { cartCount } = useCart();
   const { lang, toggleLang, t } = useLang();
 
@@ -42,6 +45,17 @@ export default function Header({ onOpenDrawer, onOpenCart, onOpenAuth, isLoggedI
           <button onClick={toggleLang} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-black tracking-wider text-white active:scale-95 transition shadow-lg border border-white/5">
             {lang.toUpperCase()}
           </button>
+
+          {/* Admin */}
+          {isAdmin && (
+            <button 
+              onClick={() => router.push('/admin')} 
+              title="Админ-панель"
+              className="px-3 sm:px-4 h-9 rounded-full bg-brand flex items-center justify-center text-white active:scale-95 transition shadow-lg shadow-brand/20 border border-brand/50 text-[9px] sm:text-[10px] font-black uppercase tracking-widest"
+            >
+              Admin
+            </button>
+          )}
           
           {/* Account */}
           <button onClick={onOpenAuth} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition shadow-lg border border-white/5 relative">

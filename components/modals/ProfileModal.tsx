@@ -5,6 +5,8 @@ import { useLang } from '@/context/LangContext';
 import { sb } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import OrderDetailsModal from './OrderDetailsModal';
+import { isAdmin } from '@/lib/authUtils';
+import { useRouter } from 'next/navigation';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -24,6 +26,7 @@ interface Order {
 
 export default function ProfileModal({ isOpen, onClose, onLogout, currentUser }: ProfileModalProps) {
   const { lang, t } = useLang();
+  const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -130,7 +133,14 @@ export default function ProfileModal({ isOpen, onClose, onLogout, currentUser }:
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-xl shadow-inner">👤</div>
             <div className="flex flex-col">
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">{name || t('profileUnnamed')}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-black text-white uppercase tracking-wider">{name || t('profileUnnamed')}</h2>
+                {isAdmin(currentUser?.email) && (
+                  <span className="bg-brand/20 text-brand border border-brand/30 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">
+                    Админ
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] text-muted font-bold tracking-widest uppercase">{currentUser?.email}</span>
             </div>
           </div>
@@ -211,7 +221,15 @@ export default function ProfileModal({ isOpen, onClose, onLogout, currentUser }:
           )}
         </div>
 
-        <div className="p-4 border-t border-white/5 bg-dark/50">
+        <div className="p-4 border-t border-white/5 bg-dark/50 flex flex-col gap-3">
+          {isAdmin(currentUser?.email) && (
+            <button 
+              onClick={() => { onClose(); router.push('/admin'); }}
+              className="w-full bg-brand text-white font-black py-3 rounded-xl active:scale-[0.98] transition shadow-lg shadow-brand/20 uppercase text-[10px] tracking-[0.2em]"
+            >
+              Перейти в Админ-панель
+            </button>
+          )}
           <button onClick={onLogout} className="w-full bg-white/5 text-muted hover:text-brand hover:border-brand/20 border border-white/10 font-black py-3 rounded-xl active:scale-[0.98] transition uppercase text-[10px] tracking-[0.2em]">
             {t('profileLogoutBtn')}
           </button>

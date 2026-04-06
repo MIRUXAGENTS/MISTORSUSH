@@ -7,6 +7,7 @@ import { useMenu } from '@/context/MenuContext';
 import { verifyPromoDay } from '@/lib/promoUtils';
 import { sb } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
+import { isAdmin } from '@/lib/authUtils';
 import dynamic from 'next/dynamic';
 
 // Components
@@ -199,6 +200,7 @@ export default function Home() {
           onOpenCart={() => setIsCartOpen(true)}
           onOpenAuth={() => currentUser ? setIsProfileOpen(true) : setIsAuthOpen(true)}
           isLoggedIn={!!currentUser}
+          isAdmin={isAdmin(currentUser?.email)}
         />
         <CategoryNav
           categories={menuData}
