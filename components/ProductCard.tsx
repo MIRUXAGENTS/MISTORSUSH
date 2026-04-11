@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 import { MenuItem, categoryBg, getItemName, getItemImage, getItemIngredients } from '@/lib/menuData';
 import { useLang } from '@/context/LangContext';
